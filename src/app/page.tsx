@@ -1,5 +1,4 @@
 export default async function Home() {
-// " text-verde"  
 return (
     <>
     <nav>
