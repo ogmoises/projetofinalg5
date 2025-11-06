@@ -33,7 +33,7 @@ const cursosData = [
   {
     id: 3,
     icon: (
-      <div className="flex space-x-3 h-10 items-center text-verde text-4xl -mt-8">
+      <div className="flex space-x-3 h-18 items-center text-verde text-4xl -mt-8 mb-3">
         <FaMobileAlt />
         <FaLaptop />
       </div>
@@ -48,7 +48,7 @@ export default function CursosSection() {
     <>
       <div className="w-full -mt-40">
         <Image 
-          src="/5.png" 
+          src="/5.svg" 
           alt="" 
           width={1920} 
           height={1920} 

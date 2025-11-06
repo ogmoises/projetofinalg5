@@ -8,7 +8,7 @@ export default function HeroSection() {
     <section className="container mx-auto flex-1 flex items-center py-12 lg:py-24 z-10 mt-16 w-full">
       <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
         <motion.div 
-          className="flex justify-center"
+          className="flex justify-center scale-135"
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
@@ -17,7 +17,7 @@ export default function HeroSection() {
           <Image 
             src="/codelingo.png" 
             alt="Mascote Codelingo a programar" 
-            width={1920} 
+            width={3840} 
             height={1920} 
             priority
             className="max-w-full h-auto"
