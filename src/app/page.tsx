@@ -59,20 +59,20 @@ export default function Home() {
       {/* Elementos decorativos */}
       <div className="absolute top-0 right-0 z-0">
         <Image 
-          src="/4.png" 
+          src="/4.svg" 
           alt=""
           width={500} 
           height={500} 
         />
       </div>
 
-      <div className="absolute bottom-0 right-0 z-0 w-full">
+      <div className="absolute bottom-0 z-0 h-1 w-full overflow-visible">
         <Image
-          src="/5.png"
+          src="/5.svg"
           alt=""
-          width={1920}
-          height={400}
-          className="w-full" 
+          width={3840}
+          height={1080}
+          className="w-full align-bottom" 
         />
       </div>
     </main>
