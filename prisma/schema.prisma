@@ -72,3 +72,42 @@ model VerificationToken {
 
     @@unique([identifier, token])
 }
+
+model Usuario {
+    id        Int                  @id @default(autoincrement())
+    email     String               @unique
+    senha     String
+    nick      String               @unique
+    Pontuacao Int                  @default(0)
+    Respostas RespostasDoUsuario[]
+}
+
+model RespostasDoUsuario {
+    id              Int     @id @default(autoincrement())
+    usuario_id      Int
+    perguntas_id    Int
+    alt_selecionado Int
+    acertou         Boolean
+
+    usuario   Usuario   @relation(fields: [usuario_id], references: [id])
+    perguntas Perguntas @relation(fields: [perguntas_id], references: [id])
+}
+
+model Perguntas {
+    id           Int    @id @default(autoincrement())
+    linguagem_id Int
+    dificuldade  Int
+    pergunta     String
+    alternativa  Json
+    alt_correta  Int
+
+    linguagem Linguagem           @relation(fields: [linguagem_id], references: [id])
+    respostas RespostasDoUsuario[]
+}
+
+model Linguagem {
+    id   Int    @id @default(autoincrement())
+    nome String
+
+    perguntas Perguntas[]
+}
