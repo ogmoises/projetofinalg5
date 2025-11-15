@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function SimpleNavbar() {
     return (
-        <header className="flex justify-center py-0.5 bg-branco">
+        <header className="flex justify-center py-5 bg-branco border-b-3 border-gray-200 w-screen">
             <Image
                 src="/logoNaybar.png"
                 alt="Logo do Codelingo"
