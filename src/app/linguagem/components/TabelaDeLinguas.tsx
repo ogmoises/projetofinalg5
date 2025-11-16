@@ -9,7 +9,7 @@ export default function TabelaDeLinguagens({ linguagens }: { linguagens: Array<s
             </h1>
             <ul className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
                 {linguagens.map((nome, index) =>
-                    <BotaoLinguagem nome={nome} posicao={index}/>)}
+                    <BotaoLinguagem nome={nome} key={index}/>)}
             </ul>
         </main>
     )
