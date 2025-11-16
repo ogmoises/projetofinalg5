@@ -25,9 +25,8 @@ export default function linguagem() {
 
     return (
         <div className="flex flex-col h-screen">
-            {/* https://ui.shadcn.com/docs/components/pagination# usar paginação para ir ao proximo item */}
             <SimpleNavbar />
-            <TabelaDeLinguagens linguagens={linguagens}/>
+            <TabelaDeLinguagens linguagens={linguagens} />
 
         </div>
     )
