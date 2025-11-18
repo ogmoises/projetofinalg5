@@ -4,7 +4,7 @@ import ListaDeDificuldades from "./components/ListaDeDificuldades"
 import SimpleNavbar from "./components/SimpleNavbar"
 
 
-export default function linguagem() {
+export default function dificuldade() {
 
 
     return (
