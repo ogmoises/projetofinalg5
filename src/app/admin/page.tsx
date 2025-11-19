@@ -14,7 +14,6 @@ export default function admin() {
                 <div className="p-2 flex justify-center">
                     <TabelaDeQuestoes />
                 </div>
-                
             </main>
         </>
     )
