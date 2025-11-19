@@ -1,3 +1,5 @@
+"use client"
+
 import TabelaElemento from "./tabelaElemento";
 
 export default function TabelaDeQuestoes() {
@@ -19,8 +21,7 @@ export default function TabelaDeQuestoes() {
                 </thead>
 
                 <tbody>
-                    <TabelaElemento />
-                    <TabelaElemento />
+                    <TabelaElemento pergunta="pergunta exemplo" opcoes={["Opção 1", "Opção 2", "Opção 3", "Opção 4", "Opção 5"]} correta={1}/>
                 </tbody>
             </table>
 
