@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function BotaoDificuldade({ texto, id }: { texto: string, id: number }) {
     return (
-        <button className="bg-white border-gray-200 border-2 w-3/7 rounded-xl py-1 flex hover:bg-gray-300 cursor-pointer items-center px-3">
+        <button className="bg-white border-gray-200 border-2 md:w-3/7 sm:w-screen rounded-xl py-1 flex hover:bg-gray-300 cursor-pointer items-center px-3 overflow-ellipsis">
             <Image src={"/level " + id + ".svg"}
                 alt={"barra nível " + id}
                 width={70}

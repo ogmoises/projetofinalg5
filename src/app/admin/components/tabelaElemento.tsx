@@ -1,17 +1,16 @@
+"use client"
+
 import Image from "next/image";
 
-
-export default function TabelaElemento() {
+export default function TabelaElemento({pergunta, opcoes, correta} : {pergunta:string, opcoes:Array<string>, correta:number}) {
     return (
         <>
             <tr className="bg-amber-400 table-row text-center">
-                <td className="w-1/2"> Pergunta</td>
-                <td>Opção 1</td>
-                <td>Opção 2</td>
-                <td>Opção 3</td>
-                <td>Opção 4</td>
-                <td>Opção 5</td>
-                <td>Correta</td>
+                <td className="w-1/2">{pergunta}</td>
+                {opcoes.map((opcao_texto, index) => (
+                    <td key={index}>{opcao_texto}</td> 
+                ))}
+                <td>{correta}</td>
                 <td>
                     <button className="hover:bg-amber-600 p-2 rounded-full border-2">
                         <Image src="pencil-icon.svg"
