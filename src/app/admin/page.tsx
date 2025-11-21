@@ -2,8 +2,9 @@
 
 import SimpleNavbar from "@/components/ui/SimpleNavbar"
 import InputQuestoes from "./components/inputQuestoes"
-import TabelaDeQuestoes from "./components/tabelaDeQuestoes"
 import CardEdicaoDePergunta from "./components/cardEdicaoDePergunta"
+import TabelaDeQuestoes, { perguntas } from "./components/dataTableDeQuestoes"
+import { colunas } from "./components/colunaTabelaDeQuestoes"
 
 export default function admin() {
     return (
@@ -12,7 +13,7 @@ export default function admin() {
             <main className="bg-branco h-screen">
                 <InputQuestoes />
                 <div className="p-2 flex justify-center">
-                    <TabelaDeQuestoes />
+                    <TabelaDeQuestoes columns={colunas} data={perguntas}/>
                 </div>
             </main>
         </>
