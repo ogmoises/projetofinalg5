@@ -1,13 +1,65 @@
 "use client"
 
 import { type ColumnDef } from "@tanstack/react-table"
-import type { Pergunta } from "./dataTableDeQuestoes"
 import Image from "next/image"
+import { ArrowUpDown } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import type { Pergunta } from "./pergutasTypo"
+import { MoreHorizontal } from "lucide-react"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import CardEdicaoDePergunta from "./cardEdicaoDePergunta"
+
 
 export const colunas: ColumnDef<Pergunta>[] = [
     {
+        accessorKey: "linguagem",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    linguagem
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            )
+        },
+    },
+    {
+        accessorKey: "dificuldade",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Dificuldade
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            )
+        },
+    },
+    {
         accessorKey: "pergunta",
-        header: "Pergunta",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Pergunta
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            )
+        },
+
     },
     {
         accessorKey: "opcao1",
@@ -34,34 +86,29 @@ export const colunas: ColumnDef<Pergunta>[] = [
         header: "Correta",
     },
     {
-        accessorKey: "edit",
-        header: "Editar",
+        id: "actions",
         cell: ({ row }) => {
-            return (
-                <button className="hover:bg-gray-400 p-1 my-1 rounded-full border-2">
-                    <Image src="pencil-icon.svg"
-                        alt="Imagem de um lapis"
-                        width={20}
-                        height={20}>
-                    </Image>
-                </button>
-            )
+            const pergunta = row.original
 
-        }
-    },
-    {
-        accessorKey: "apagar",
-        header: "Apagar",
-        cell: ({ row }) => {
             return (
-                <button className="hover:bg-gray-400 p-1 my-1 rounded-full border-2">
-                    <Image src="trash-icon.svg"
-                        alt="Imagem de uma lixeira"
-                        width={20}
-                        height={20}>
-                    </Image>
-                </button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem >
+                            Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                            Apagar
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             )
-        }
+        },
     },
 ]
