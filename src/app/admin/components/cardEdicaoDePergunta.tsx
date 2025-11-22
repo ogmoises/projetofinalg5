@@ -13,9 +13,10 @@ import {
 import { Field, FieldGroup, FieldSet } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Label } from "@radix-ui/react-label"
+import { Label } from "@/components/ui/label"
+import type { Pergunta } from "./pergutasTypo"
 
-export default function cardEdicaoDePergunta() {
+export default function cardEdicaoDePergunta({ pergunta }: { pergunta: Pergunta }) {
     return (
         <Card className="w-1/2 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0">
             <CardHeader>
@@ -28,15 +29,30 @@ export default function cardEdicaoDePergunta() {
             <CardContent>
                 <FieldSet>
                     <Field>
-                        <Input type="text" placeholder="Pergunta" />
+                        <Input type="text" placeholder="Pergunta" defaultValue={pergunta.pergunta} />
                     </Field>
 
                     <FieldGroup className="flex flex-row min-w-fit">
-                        <Field><Input id="opcao1" type="text" placeholder="Opção 1" /></Field>
-                        <Field><Input id="opcao2" type="text" placeholder="Opção 2" /></Field>
-                        <Field><Input id="opcao3" type="text" placeholder="Opção 3" /></Field>
-                        <Field><Input id="opcao4" type="text" placeholder="Opção 4" /></Field>
-                        <Field><Input id="opcao5" type="text" placeholder="Opção 5" /></Field>
+                        <div className='w-full max-w-xs space-y-2'>
+                            <Label >Opção 1</Label>
+                            <Field><Input id="opcao1" type="text" placeholder="Opção 1" defaultValue={pergunta.opcao1} /></Field>
+                        </div>
+                        <div className='w-full max-w-xs space-y-2'>
+                            <Label >Opção 2</Label>
+                            <Field><Input id="opcao2" type="text" placeholder="Opção 2" defaultValue={pergunta.opcao2} /></Field>
+                        </div>
+                        <div className='w-full max-w-xs space-y-2'>
+                            <Label >Opção 3</Label>
+                            <Field><Input id="opcao3" type="text" placeholder="Opção 3" defaultValue={pergunta.opcao3} /></Field>
+                        </div>
+                        <div className='w-full max-w-xs space-y-2'>
+                            <Label >Opção 4</Label>
+                            <Field><Input id="opcao4" type="text" placeholder="Opção 4" defaultValue={pergunta.opcao4} /></Field>
+                        </div>
+                        <div className='w-full max-w-xs space-y-2'>
+                            <Label >Opção 5</Label>
+                            <Field><Input id="opcao5" type="text" placeholder="Opção 5" defaultValue={pergunta.opcao5} /></Field>
+                        </div>
                     </FieldGroup>
 
                     <Field className="w-1/4">
