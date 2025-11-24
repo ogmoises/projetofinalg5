@@ -2,10 +2,10 @@
 
 import { useEffect } from "react";
 import Image from "next/image";
-import Navbar from "./components/Navbar";
-import HeroSection from "./components/HeroSection";
-import CursosSection from "./components/Cursos";
-import FAQSection from "./components/FAQSection";
+import Navbar from "./landingPage/Navbar";
+import HeroSection from "./landingPage/HeroSection";
+import CursosSection from "./landingPage/Cursos";
+import FAQSection from "./landingPage/FAQSection";
 
 export default function Home() {
   const scrollToSection = (sectionId: string) => {
@@ -56,11 +56,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Elementos decorativos */}
+      {/* Elementos decorativos ondas*/}
       <div className="absolute top-0 right-0 z-0">
         <Image 
           src="/4.svg" 
           alt=""
+          background-color ="branco"
           width={500} 
           height={500} 
         />
@@ -73,6 +74,8 @@ export default function Home() {
           width={3840}
           height={1080}
           className="w-full align-bottom" 
+
+          
         />
       </div>
     </main>
