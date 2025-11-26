@@ -1,11 +1,21 @@
+//"use client";
+
 "use client";
 
+import { redirect } from "next/navigation";
+
+export default function Page() {
+  redirect("/quiz");
+}
+
+/*
 import { useEffect } from "react";
 import Image from "next/image";
 import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
 import CursosSection from "./components/Cursos";
 import FAQSection from "./components/FAQSection";
+
 
 export default function Home() {
   const scrollToSection = (sectionId: string) => {
@@ -56,7 +66,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Elementos decorativos */}
+      {/* Elementos decorativos *}
       <div className="absolute top-0 right-0 z-0">
         <Image 
           src="/4.svg" 
@@ -78,3 +88,4 @@ export default function Home() {
     </main>
   );
 }
+*/
