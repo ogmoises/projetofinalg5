@@ -49,10 +49,6 @@ export default function cardEdicaoDePergunta({ pergunta }: { pergunta: Pergunta 
                             <Label >Opção 4</Label>
                             <Field><Input id="opcao4" type="text" placeholder="Opção 4" defaultValue={pergunta.opcao4} /></Field>
                         </div>
-                        <div className='w-full max-w-xs space-y-2'>
-                            <Label >Opção 5</Label>
-                            <Field><Input id="opcao5" type="text" placeholder="Opção 5" defaultValue={pergunta.opcao5} /></Field>
-                        </div>
                     </FieldGroup>
 
                     <Field className="w-1/4">
@@ -65,7 +61,6 @@ export default function cardEdicaoDePergunta({ pergunta }: { pergunta: Pergunta 
                                 <SelectItem value="opcao2">Opção 2</SelectItem>
                                 <SelectItem value="opcao3">Opção 3</SelectItem>
                                 <SelectItem value="opcao4">Opção 4</SelectItem>
-                                <SelectItem value="opcao5">Opção 5</SelectItem>
                             </SelectContent>
 
                         </Select>

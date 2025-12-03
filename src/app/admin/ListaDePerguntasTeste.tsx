@@ -9,7 +9,6 @@ export const perguntas: Pergunta[] = [
         opcao2: "if",
         opcao3: "console.log",
         opcao4: "function",
-        opcao5: "undefined",
         correta: 2,
         id: 1
     },
@@ -21,7 +20,6 @@ export const perguntas: Pergunta[] = [
         opcao2: "echo()",
         opcao3: "write()",
         opcao4: "log()",
-        opcao5: "display()",
         correta: 1,
         id: 2
     },
@@ -33,21 +31,8 @@ export const perguntas: Pergunta[] = [
         opcao2: "Array",
         opcao3: "int",
         opcao4: "List",
-        opcao5: "HashMap",
         correta: 3,
         id: 3
-    },
-    {
-        linguagem: "C#",
-        dificuldade: 3,
-        pergunta: "Qual dos seguintes não é um tipo de dados?",
-        opcao1: "int",
-        opcao2: "double",
-        opcao3: "object",
-        opcao4: "string",
-        opcao5: "tuple",
-        correta: 5,
-        id: 4
     },
     {
         linguagem: "Swift",
@@ -57,7 +42,6 @@ export const perguntas: Pergunta[] = [
         opcao2: "define",
         opcao3: "function",
         opcao4: "method",
-        opcao5: "create",
         correta: 1,
         id: 5
     },
@@ -69,7 +53,6 @@ export const perguntas: Pergunta[] = [
         opcao2: "parse",
         opcao3: "cast",
         opcao4: "convert",
-        opcao5: "integer",
         correta: 1,
         id: 6
     },
@@ -81,7 +64,6 @@ export const perguntas: Pergunta[] = [
         opcao2: "<php>",
         opcao3: "<?code>",
         opcao4: "<script>",
-        opcao5: "<?html>",
         correta: 1,
         id: 7
     },
@@ -93,7 +75,6 @@ export const perguntas: Pergunta[] = [
         opcao2: "integer x",
         opcao3: "x := int",
         opcao4: "let x = int",
-        opcao5: "def x:int",
         correta: 1,
         id: 8
     },
@@ -105,7 +86,6 @@ export const perguntas: Pergunta[] = [
         opcao2: "var",
         opcao3: "let",
         opcao4: "const",
-        opcao5: "mutable",
         correta: 2,
         id: 9
     },
@@ -117,7 +97,6 @@ export const perguntas: Pergunta[] = [
         opcao2: "Suporta tipagem estática",
         opcao3: "É mais lento",
         opcao4: "Tem mais palavras-chave",
-        opcao5: "É menos flexível",
         correta: 2,
         id: 10
     },
@@ -129,7 +108,6 @@ export const perguntas: Pergunta[] = [
         opcao2: "Ownership",
         opcao3: "Garbage Collection",
         opcao4: "Type Inference",
-        opcao5: "Memory Management",
         correta: 2,
         id: 11
     },
@@ -141,7 +119,6 @@ export const perguntas: Pergunta[] = [
         opcao2: "if",
         opcao3: "console.log",
         opcao4: "function",
-        opcao5: "undefined",
         correta: 2, // opcao2 is correct
         id: 12
     },
@@ -153,7 +130,6 @@ export const perguntas: Pergunta[] = [
         opcao2: "echo()",
         opcao3: "write()",
         opcao4: "log()",
-        opcao5: "display()",
         correta: 1, // opcao1 is correct
         id: 13
     },
@@ -165,7 +141,6 @@ export const perguntas: Pergunta[] = [
         opcao2: "Array",
         opcao3: "int",
         opcao4: "List",
-        opcao5: "HashMap",
         correta: 3, // opcao3 is correct
         id: 14
     }
