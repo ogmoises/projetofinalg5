@@ -37,7 +37,6 @@ export default function inputQuestoes() {
                     <Field><Input id="opcao2" type="text" placeholder="Opção 2" /></Field>
                     <Field><Input id="opcao3" type="text" placeholder="Opção 3" /></Field>
                     <Field><Input id="opcao4" type="text" placeholder="Opção 4" /></Field>
-                    <Field><Input id="opcao5" type="text" placeholder="Opção 5" /></Field>
                 </FieldGroup>
             </div>
             <div className="flex space-x-2">
@@ -51,7 +50,6 @@ export default function inputQuestoes() {
                             <SelectItem value="opcao2">Opção 2</SelectItem>
                             <SelectItem value="opcao3">Opção 3</SelectItem>
                             <SelectItem value="opcao4">Opção 4</SelectItem>
-                            <SelectItem value="opcao5">Opção 5</SelectItem>
                         </SelectContent>
 
                     </Select>

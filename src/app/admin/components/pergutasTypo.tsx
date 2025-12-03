@@ -6,7 +6,6 @@ export type Pergunta = {
     opcao2: string
     opcao3: string
     opcao4: string
-    opcao5: string
     correta: number
     id: number
 }

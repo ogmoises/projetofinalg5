@@ -78,10 +78,6 @@ export const colunas: ColumnDef<Pergunta>[] = [
         header: "Opção 4",
     },
     {
-        accessorKey: "opcao5",
-        header: "Opção 5",
-    },
-    {
         accessorKey: "correta",
         header: "Correta",
     },
