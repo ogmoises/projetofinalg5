@@ -64,8 +64,8 @@ export const perguntaRouter = createTRPCRouter({
             return pergunta_formatada as Pergunta
         }),
 
-    findUnique: publicProcedure
-        .input(z.number())
+    findUniqueById: publicProcedure
+        .input(z.object({ id: z.number() }))
         .query(async ({ input, ctx }) => {
             const pergunta = await ctx.db.perguntas.findUnique({
                 where: { id: input }
@@ -166,7 +166,7 @@ export const perguntaRouter = createTRPCRouter({
         }),
 
     delete: publicProcedure
-        .input(pergunta_schema)
+        .input(z.object({ id: z.number() }))
         .mutation(async ({ input, ctx }) => {
             const pergunta_apagada = await ctx.db.perguntas.delete({
                 where: { id: input.id }

@@ -14,7 +14,6 @@ import {
 import type { Pergunta } from "./pergutasTypo"
 import { api } from "@/trpc/react"
 
-
 export const colunas: ColumnDef<Pergunta>[] = [
     {
         accessorKey: "linguagem",
@@ -30,10 +29,10 @@ export const colunas: ColumnDef<Pergunta>[] = [
             )
         },
         cell: ({ row }) => {
-            const linguagem = api.linguagens.findUniqueById.useQuery({id: row.original.linguagem_id}).data?.nome
+            const linguagem = api.linguagens.findUniqueById.useQuery({ id: row.original.linguagem_id }).data?.nome
             return (
                 <>
-                {linguagem}
+                    {linguagem}
                 </>
             )
         }
@@ -92,6 +91,8 @@ export const colunas: ColumnDef<Pergunta>[] = [
         cell: ({ row }) => {
             const pergunta = row.original
 
+            const mutation = api.pergunta.delete.useMutation()
+
             return (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -105,7 +106,7 @@ export const colunas: ColumnDef<Pergunta>[] = [
                         <DropdownMenuItem >
                             Editar
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => mutation.mutate({ id: pergunta.id })}>
                             Apagar
                         </DropdownMenuItem>
                     </DropdownMenuContent>

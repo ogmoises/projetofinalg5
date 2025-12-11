@@ -28,5 +28,3 @@ export default function admin() {
         </>
     )
 }
-
-//<TabelaDeQuestoes columns={colunas} data={perguntas} />
