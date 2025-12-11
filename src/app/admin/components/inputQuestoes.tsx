@@ -2,15 +2,8 @@
 
 import {
     Field,
-    FieldContent,
-    FieldDescription,
-    FieldError,
     FieldGroup,
-    FieldLabel,
-    FieldLegend,
-    FieldSeparator,
     FieldSet,
-    FieldTitle,
 } from "@/components/ui/field"
 
 import {
@@ -37,6 +30,7 @@ export default function inputQuestoes() {
                     <Field><Input id="opcao2" type="text" placeholder="Opção 2" /></Field>
                     <Field><Input id="opcao3" type="text" placeholder="Opção 3" /></Field>
                     <Field><Input id="opcao4" type="text" placeholder="Opção 4" /></Field>
+                    <Field><Input id="dificuldade" type="number" placeholder="Dificuldade"/></Field>
                 </FieldGroup>
             </div>
             <div className="flex space-x-2">

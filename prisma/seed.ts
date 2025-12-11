@@ -23,10 +23,10 @@ async function main() {
 
     const perguntas = await prisma.perguntas.create({
         data:{
-            linguagem_id:py.id,
+            linguagem_id:1,
             dificuldade:1,
             pergunta:"Como se faz um dicionario em python",
-            alternativa:['{}', "dicionario()", "create dict"],
+            alternativa:['{}', "dicionario()", "create dict", "fazer dicionario"],
             alt_correta:0
         }
     });
