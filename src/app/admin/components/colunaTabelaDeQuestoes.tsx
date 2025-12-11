@@ -1,20 +1,18 @@
 "use client"
 
 import { type ColumnDef } from "@tanstack/react-table"
-import Image from "next/image"
 import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import type { Pergunta } from "./pergutasTypo"
 import { MoreHorizontal } from "lucide-react"
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import CardEdicaoDePergunta from "./cardEdicaoDePergunta"
+import type { Pergunta } from "./pergutasTypo"
+import { api } from "@/trpc/react"
 
 
 export const colunas: ColumnDef<Pergunta>[] = [
@@ -31,6 +29,14 @@ export const colunas: ColumnDef<Pergunta>[] = [
                 </Button>
             )
         },
+        cell: ({ row }) => {
+            const linguagem = api.linguagens.findUniqueById.useQuery({id: row.original.linguagem_id}).data?.nome
+            return (
+                <>
+                {linguagem}
+                </>
+            )
+        }
     },
     {
         accessorKey: "dificuldade",
@@ -62,23 +68,23 @@ export const colunas: ColumnDef<Pergunta>[] = [
 
     },
     {
-        accessorKey: "opcao1",
-        header: "Opção 1",
+        accessorKey: "alternativa1",
+        header: "Alt 1",
     },
     {
-        accessorKey: "opcao2",
-        header: "Opção 2",
+        accessorKey: "alternativa2",
+        header: "Alt 2",
     },
     {
-        accessorKey: "opcao3",
-        header: "Opção 3",
+        accessorKey: "alternativa3",
+        header: "Alt 3",
     },
     {
-        accessorKey: "opcao4",
-        header: "Opção 4",
+        accessorKey: "alternativa4",
+        header: "Alt 4",
     },
     {
-        accessorKey: "correta",
+        accessorKey: "alt_correta",
         header: "Correta",
     },
     {

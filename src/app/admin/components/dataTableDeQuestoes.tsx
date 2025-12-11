@@ -12,8 +12,6 @@ import {
     useReactTable,
 } from "@tanstack/react-table"
 
-import { Button } from "@/components/ui/button"
-
 import {
     Table,
     TableBody,
@@ -26,10 +24,6 @@ import { DataTablePagination } from "./paginacaoTabelaDeQuestoes"
 import React from "react"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { perguntas } from "../ListaDePerguntasTeste"
-import CardEdicaoDePergunta from "./cardEdicaoDePergunta"
-
-
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]

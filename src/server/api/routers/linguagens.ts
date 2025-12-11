@@ -7,7 +7,7 @@ export interface Linguagem {
     id: number
 }
 
-export const linguagemRouter = createTRPCRouter({
+export const linguagensRouter = createTRPCRouter({
     create: publicProcedure
         .input(z.object({ nome: z.string().min(1) }))
         .mutation(async ({ input, ctx }) => {
@@ -21,7 +21,7 @@ export const linguagemRouter = createTRPCRouter({
             return linguagem_criada as Linguagem
         }),
 
-    getByName: publicProcedure
+    findUniqueByName: publicProcedure
         .input(z.object({ nome: z.string().min(1) }))
         .query(async ({ input, ctx }) => {
             const linguagem = await ctx.db.linguagem.findUnique({
@@ -31,7 +31,7 @@ export const linguagemRouter = createTRPCRouter({
 
         }),
 
-    getById: publicProcedure
+    findUniqueById: publicProcedure
         .input(z.object({ id: z.number() }))
         .query(async ({ input, ctx }) => {
             const linguagem = await ctx.db.linguagem.findUnique({
@@ -57,17 +57,16 @@ export const linguagemRouter = createTRPCRouter({
         }),
 
     delete: publicProcedure
-        .input(z.object({ nome: z.string().min(1).optional(), id: z.number() }))
+        .input(z.object({ id: z.number() }))
         .mutation(async ({ input, ctx }) => {
             const linguagem_apagada = await ctx.db.linguagem.delete({
                 where: {
                     id: input.id,
-                    nome: input.nome
                 }
             })
 
             if (!linguagem_apagada)
-                throw new TRPCError({ message: "Erro ao deletar lingaugem", code: "INTERNAL_SERVER_ERROR" })
+                throw new TRPCError({ message: "Erro ao deletar linguagem", code: "INTERNAL_SERVER_ERROR" })
 
             return linguagem_apagada as Linguagem
         }),

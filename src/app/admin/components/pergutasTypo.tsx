@@ -1,11 +1,11 @@
-export type Pergunta = {
-    linguagem: string
-    dificuldade: number
-    pergunta: string
-    opcao1: string
-    opcao2: string
-    opcao3: string
-    opcao4: string
-    correta: number
+export interface Pergunta {
     id: number
+    pergunta: string
+    alternativa1: string
+    alternativa2: string
+    alternativa3: string
+    alternativa4: string
+    alt_correta: number
+    linguagem_id: number
+    dificuldade: number
 }
