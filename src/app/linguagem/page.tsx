@@ -1,6 +1,6 @@
 "use client"
 
-import SimpleNavbar from "./components/SimpleNavbar"
+import SimpleNavbar from "../../components/ui/SimpleNavbar"
 import TabelaDeLinguagens from "./components/TabelaDeLinguas"
 
 export default function linguagem() {

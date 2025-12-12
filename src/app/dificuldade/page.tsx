@@ -1,10 +1,10 @@
 "use client"
 
 import ListaDeDificuldades from "./components/ListaDeDificuldades"
-import SimpleNavbar from "./components/SimpleNavbar"
+import SimpleNavbar from "../../components/ui/SimpleNavbar"
 
 
-export default function linguagem() {
+export default function dificuldade() {
 
 
     return (
