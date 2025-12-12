@@ -16,12 +16,9 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
 import { api } from "@/trpc/react";
 import z from "zod";
 import { useForm } from "react-hook-form";
-import linguagem from "@/app/linguagem/page";
-import dificuldade from "@/app/dificuldade/page";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormField } from "@/components/ui/form";
 
@@ -38,10 +35,17 @@ const formSchema = z.object({
 
 export default function inputQuestoes() {
 
-    const mutation = api.pergunta.create.useMutation()
-    
+    const utils = api.useUtils()
+
+    const mutation = api.pergunta.create.useMutation({
+        onSuccess(input) {
+            utils.pergunta.list.invalidate();
+        },
+
+    })
+
     function onSubmit(values: z.infer<typeof formSchema>) {
-        
+
         mutation.mutate({
             pergunta: values.pergunta,
             linguagem: values.linguagem,
@@ -51,10 +55,17 @@ export default function inputQuestoes() {
             alternativa4: values.alternativa4,
             alt_correta: values.alt_correta,
             dificuldade: values.dificuldade,
+
         })
 
         form.reset()
+
     }
+
+    function onBadSubmit(values: z.infer<typeof formSchema>) {
+        alert("Parametros invalidos")
+    }
+
 
     const form = useForm<z.infer<typeof formSchema>>({
         mode: "onChange",
@@ -72,12 +83,8 @@ export default function inputQuestoes() {
 
     });
 
-    function onbadSubmit(values: z.infer<typeof formSchema>) {
-        alert("Parametros invalidos")
-    }
-
     return (
-        <form onSubmit={form.handleSubmit(onSubmit, onbadSubmit)} >
+        <form onSubmit={form.handleSubmit(onSubmit, onBadSubmit)} >
             <FieldSet className="flex px-10 py-5">
                 <div className="flex flex-row space-x-2">
                     <Field className="w-1/2">
