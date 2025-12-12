@@ -6,16 +6,10 @@ import CardEdicaoDePergunta from "./components/cardEdicaoDePergunta"
 import { colunas } from "./components/colunaTabelaDeQuestoes"
 import TabelaDeQuestoes from "./components/dataTableDeQuestoes"
 import { api } from "@/trpc/react"
-import type { Pergunta } from "./components/pergutasTypo"
-import { useContext } from "react"
 
 export default function admin() {
 
     const query = api.pergunta.list.useQuery();
-
-    if (query.data) {
-        const perguntas = query.data as Pergunta[];
-    }
 
     return (
         <>
@@ -23,10 +17,11 @@ export default function admin() {
             <main className="bg-branco h-full pb-20">
                 <InputQuestoes />
                 <div className="p-2 flex justify-center pt-10">
-
                     {query.data && <TabelaDeQuestoes columns={colunas} data={query.data} />}
                 </div>
             </main>
         </>
     )
 }
+
+//

@@ -27,7 +27,7 @@ async function main() {
             dificuldade:1,
             pergunta:"Como se faz um dicionario em python",
             alternativa:['{}', "dicionario()", "create dict", "fazer dicionario"],
-            alt_correta:0
+            alt_correta:1
         }
     });
 

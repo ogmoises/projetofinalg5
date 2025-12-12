@@ -21,30 +21,14 @@ import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormField } from "@/components/ui/form";
-
-const formSchema = z.object({
-    pergunta: z.string().min(1),
-    alternativa1: z.string().min(1),
-    alternativa2: z.string().min(1),
-    alternativa3: z.string().min(1),
-    alternativa4: z.string().min(1),
-    alt_correta: z.number().min(1).max(4),
-    linguagem: z.string().min(1),
-    dificuldade: z.number().min(1)
-})
+import { pergunta_schema } from "../pergutasTypo";
 
 export default function inputQuestoes() {
 
-    const utils = api.useUtils()
 
-    const mutation = api.pergunta.create.useMutation({
-        onSuccess(input) {
-            utils.pergunta.list.invalidate();
-        },
+    const mutation = api.pergunta.create.useMutation()
 
-    })
-
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    function onSubmit(values: z.infer<typeof pergunta_schema>) {
 
         mutation.mutate({
             pergunta: values.pergunta,
@@ -55,19 +39,19 @@ export default function inputQuestoes() {
             alternativa4: values.alternativa4,
             alt_correta: values.alt_correta,
             dificuldade: values.dificuldade,
-
+            id: values.id,
         })
 
         form.reset()
 
     }
 
-    function onBadSubmit(values: z.infer<typeof formSchema>) {
+    function onBadSubmit(values: z.infer<typeof pergunta_schema>) {
         alert("Parametros invalidos")
     }
 
 
-    const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm<z.infer<typeof pergunta_schema>>({
         mode: "onChange",
         defaultValues: {
             pergunta: "",
@@ -79,7 +63,7 @@ export default function inputQuestoes() {
             alt_correta: 1,
             dificuldade: 1
         },
-        resolver: zodResolver(formSchema)
+        resolver: zodResolver(pergunta_schema)
 
     });
 

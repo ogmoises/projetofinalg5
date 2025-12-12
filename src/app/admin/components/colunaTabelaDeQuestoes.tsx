@@ -11,8 +11,10 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Pergunta } from "./pergutasTypo"
+import type { Pergunta } from "../pergutasTypo"
 import { api } from "@/trpc/react"
+import React, { createContext, useContext, useState } from "react"
+import CardEdicaoDePergunta from "./cardEdicaoDePergunta"
 
 export const colunas: ColumnDef<Pergunta>[] = [
     {
@@ -91,12 +93,7 @@ export const colunas: ColumnDef<Pergunta>[] = [
         cell: ({ row }) => {
             const pergunta = row.original
 
-            const utils = api.useUtils()
-            const mutation = api.pergunta.delete.useMutation({
-                onSuccess(input) {
-                    utils.pergunta.findUniqueById.invalidate({ id: input.id }); // Will not invalidate queries for other id's
-                },
-            })
+            const mutation = api.pergunta.delete.useMutation()
 
             return (
                 <DropdownMenu>

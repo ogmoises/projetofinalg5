@@ -1,20 +1,9 @@
 import z from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import type { Pergunta } from "@/app/admin/components/pergutasTypo";
+import { pergunta_schema, type Pergunta } from "@/app/admin/pergutasTypo";
 import type { Prisma } from "@prisma/client";
 
-const pergunta_schema = z.object({
-    id: z.number().optional(),
-    pergunta: z.string().min(1),
-    alternativa1: z.string().min(1),
-    alternativa2: z.string().min(1),
-    alternativa3: z.string().min(1),
-    alternativa4: z.string().min(1),
-    alt_correta: z.number().min(1).max(4),
-    linguagem: z.string().min(1),
-    dificuldade: z.number().min(1)
-})
 
 export const perguntaRouter = createTRPCRouter({
     create: publicProcedure
@@ -68,7 +57,7 @@ export const perguntaRouter = createTRPCRouter({
         .input(z.object({ id: z.number() }))
         .query(async ({ input, ctx }) => {
             const pergunta = await ctx.db.perguntas.findUnique({
-                where: { id: input }
+                where: { id: input.id }
             })
 
             if (!pergunta)
