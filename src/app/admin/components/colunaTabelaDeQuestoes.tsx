@@ -91,7 +91,12 @@ export const colunas: ColumnDef<Pergunta>[] = [
         cell: ({ row }) => {
             const pergunta = row.original
 
-            const mutation = api.pergunta.delete.useMutation()
+            const utils = api.useUtils()
+            const mutation = api.pergunta.delete.useMutation({
+                onSuccess(input) {
+                    utils.pergunta.findUniqueById.invalidate({ id: input.id }); // Will not invalidate queries for other id's
+                },
+            })
 
             return (
                 <DropdownMenu>
