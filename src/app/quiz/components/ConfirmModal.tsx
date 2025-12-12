@@ -1,4 +1,3 @@
-// src/components/ConfirmModal.tsx
 "use client";
 import React, { useEffect } from "react";
 
@@ -11,7 +10,7 @@ type Props = {
 };
 
 export default function ConfirmModal({ open, title = "Tem certeza?", description = "", onConfirm, onCancel }: Props) {
-  // trancar scroll do body enquanto modal aberto
+  
   useEffect(() => {
     if (open) {
       document.documentElement.style.overflow = "hidden";
@@ -24,7 +23,7 @@ export default function ConfirmModal({ open, title = "Tem certeza?", description
   }, [open]);
 
   if (!open) return null;
-
+/////////
   return (
     <div
       role="dialog"
