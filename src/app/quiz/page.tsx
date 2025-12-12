@@ -1,10 +1,9 @@
-// src/app/quiz/page.tsx  (ou app/quiz/[id]/page.tsx)
 "use client";
 import { useState } from "react";
 import Image from "next/image";
-// import useRouter se quiser navegar após enviar
+
 import { useRouter } from "next/navigation";
-import ConfirmModal from "./components/ConfirmModal"; // ajuste se não usa alias @/
+import ConfirmModal from "./components/ConfirmModal";
 
 export default function PerguntaPage() {
   const [selected, setSelected] = useState<null | number>(null);
@@ -16,7 +15,7 @@ export default function PerguntaPage() {
     setSelected((prev) => (prev === index ? null : index));
   }
 
-  // abre modal de confirmação
+ 
   function handleOpenConfirm() {
     if (selected === null) {
       alert("Selecione uma opção antes de enviar.");
@@ -25,18 +24,18 @@ export default function PerguntaPage() {
     setConfirmOpen(true);
   }
 
-  // chamado quando usuário confirma (Siqm)
+
   async function handleConfirmSend() {
     setConfirmOpen(false);
     setLoading(true);
 
     try {
-      // exemplo de envio ao backend; adapte a rota/payload conforme seu backend
+     
       const res = await fetch("/api/answers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          questionId: 1, // ajuste dinamicamente se usar rotas /quiz/[id]
+          questionId: 1, 
           selected,
           timestamp: new Date().toISOString(),
         }),
@@ -49,11 +48,10 @@ export default function PerguntaPage() {
         return;
       }
 
-      // comportamento atual: mostrar alert (igual ao código original)
+      
       alert(`Resposta enviada: opção ${selected}`);
 
-      // opcional: navegar para próxima pergunta (exemplo)
-      // router.push("/quiz/2"); // descomente e ajuste conforme seu fluxo
+      
     } catch (err) {
       console.error(err);
       alert("Erro de comunicação com o servidor.");
@@ -64,7 +62,7 @@ export default function PerguntaPage() {
 
   return (
     <main className="relative min-h-screen flex items-center justify-center bg-white p-6">
-      {/* Logos no topo */}
+      {/* Logos */}
       <div className="absolute top-6 left-6 z-20">
         <Image src="/logoNaybar.png" alt="Logo esquerda" width={120} height={40} className="object-contain" priority />
       </div>
