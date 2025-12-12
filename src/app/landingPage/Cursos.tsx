@@ -9,7 +9,7 @@ const cursosData = [
     id: 1,
     icon: (
       <div className="flex space-x-5 h-20 items-center -mt-10 mx-10">
-        <Image src="/simbolo pyhton.png" alt="Python" width={40} height={40} />
+        <Image src="/Python.svg" alt="Python" width={55} height={55} />
         <Image src="/simbolo C++.png" alt="C++" width={40} height={40} />
       </div>
     ),
