@@ -94,15 +94,17 @@ model RespostasDoUsuario {
 }
 
 model Perguntas {
-    id           Int    @id @default(autoincrement())
-    linguagem_id Int
-    dificuldade  Int
-    pergunta     String
-    alternativa  Json
-    alt_correta  Int
+  id           Int    @id @default(autoincrement())
+  linguagem_id Int
+  dificuldade  Int
+  pergunta     String
+  alternativa  Json   // Array de strings
+  alt_correta  Int
 
-    linguagem Linguagem           @relation(fields: [linguagem_id], references: [id])
-    respostas RespostasDoUsuario[]
+  linguagem Linguagem           @relation(fields: [linguagem_id], references: [id])
+  respostas RespostasDoUsuario[]
+  
+  @@index([linguagem_id, dificuldade])
 }
 
 model Linguagem {
