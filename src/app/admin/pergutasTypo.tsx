@@ -23,3 +23,14 @@ export const pergunta_schema = z.object({
     linguagem: z.string().min(1),
     dificuldade: z.number().min(1)
 })
+
+export const pergunta_creation_schema = z.object({
+    pergunta: z.string().min(1),
+    alternativa1: z.string().min(1),
+    alternativa2: z.string().min(1),
+    alternativa3: z.string().min(1),
+    alternativa4: z.string().min(1),
+    alt_correta: z.number().min(1).max(4),
+    linguagem: z.string().min(1),
+    dificuldade: z.number().min(1)
+})

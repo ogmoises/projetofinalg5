@@ -16,10 +16,12 @@ import { api } from "@/trpc/react"
 import React, { createContext, useContext, useState } from "react"
 import CardEdicaoDePergunta from "./cardEdicaoDePergunta"
 
+
+
 export const colunas: ColumnDef<Pergunta>[] = [
     {
         accessorKey: "linguagem",
-        header: ({ column }) => {
+        /* header: ({ column }) => {
             return (
                 <Button
                     variant="ghost"
@@ -29,9 +31,9 @@ export const colunas: ColumnDef<Pergunta>[] = [
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
-        },
+        }, */
         cell: ({ row }) => {
-            const linguagem = api.linguagens.findUniqueById.useQuery({ id: row.original.linguagem_id }).data?.nome
+            const linguagem = api.linguagens.findUniqueById.useQuery({ id: row.original.linguagem_id }).data?.nome!
             return (
                 <>
                     {linguagem}
@@ -88,7 +90,7 @@ export const colunas: ColumnDef<Pergunta>[] = [
         accessorKey: "alt_correta",
         header: "Correta",
     },
-    {
+    /* {
         id: "actions",
         cell: ({ row }) => {
             const pergunta = row.original
@@ -115,5 +117,5 @@ export const colunas: ColumnDef<Pergunta>[] = [
                 </DropdownMenu>
             )
         },
-    },
+    }, */
 ]

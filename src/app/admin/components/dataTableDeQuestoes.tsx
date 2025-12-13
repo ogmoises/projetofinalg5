@@ -21,9 +21,13 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { DataTablePagination } from "./paginacaoTabelaDeQuestoes"
-import React from "react"
+import React, { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import { MoreHorizontal } from "lucide-react"
+import { api } from "@/trpc/react"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -33,12 +37,12 @@ interface DataTableProps<TData, TValue> {
 export default function TabelaDeQuestoes<TData, TValue>({
     columns,
     data,
-}: DataTableProps<TData, TValue>) {
+    edit,  // Add the edit prop here
+}: DataTableProps<TData, TValue> & { edit: (pergunta: TData) => void }) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
         []
     )
-
 
     const table = useReactTable({
         data,
@@ -55,9 +59,12 @@ export default function TabelaDeQuestoes<TData, TValue>({
         },
     })
 
+    const mutation = api.pergunta.delete.useMutation()
+
     return (
+
         <div className="flex flex-col w-screen px-20">
-            <div className="items-center py-4">
+            {/* <div className="items-center py-4">
                 <Input
                     placeholder="Filtrar linguagem..."
                     value={(table.getColumn("linguagem")?.getFilterValue() as string) ?? ""}
@@ -66,7 +73,7 @@ export default function TabelaDeQuestoes<TData, TValue>({
                     }
                     className="max-w-sm"
                 />
-            </div>
+            </div> */}
             <Separator />
             <div className="flex flex-col items-center pt-4">
                 <Table >
@@ -100,8 +107,30 @@ export default function TabelaDeQuestoes<TData, TValue>({
                                         <TableCell key={cell.id}>
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
+
                                     ))}
+
+                                    <TableCell>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                                    <span className="sr-only">Open menu</span>
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                <DropdownMenuItem onClick={() => edit(row.original)}>
+                                                    Editar
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => mutation.mutate({ id: row.original.id })}>
+                                                    Apagar
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </TableCell>
                                 </TableRow>
+
                             ))
                         ) : (
                             <TableRow>
@@ -114,27 +143,6 @@ export default function TabelaDeQuestoes<TData, TValue>({
                 </Table>
                 <DataTablePagination table={table} />
             </div>
-
-            {/* <table className="w-19/20 shadow-xl h-fit border-2">
-                <thead className="text-2xl text-center">
-                    <tr>
-                        <th className="py-1">Pergunta</th>
-                        <th className="py-1">Opção 1</th>
-                        <th className="py-1">Opção 2</th>
-                        <th className="py-1">Opção 3</th>
-                        <th className="py-1">Opção 4</th>
-                        <th className="py-1">Opção 5</th>
-                        <th className="py-1">Correta</th>
-                        <th className="py-1">Edit</th>
-                        <th className="py-1">Delete</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <TabelaElemento pergunta="pergunta exemplo" opcoes={["Opção 1", "Opção 2", "Opção 3", "Opção 4", "Opção 5"]} correta={1} />
-                </tbody>
-            </table>*/}
-
         </div>
     )
 }

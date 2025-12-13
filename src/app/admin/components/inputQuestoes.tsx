@@ -21,14 +21,14 @@ import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormField } from "@/components/ui/form";
-import { pergunta_schema } from "../pergutasTypo";
+import { pergunta_creation_schema } from "../pergutasTypo";
 
 export default function inputQuestoes() {
 
 
     const mutation = api.pergunta.create.useMutation()
 
-    function onSubmit(values: z.infer<typeof pergunta_schema>) {
+    function onSubmit(values: z.infer<typeof pergunta_creation_schema>) {
 
         mutation.mutate({
             pergunta: values.pergunta,
@@ -39,19 +39,19 @@ export default function inputQuestoes() {
             alternativa4: values.alternativa4,
             alt_correta: values.alt_correta,
             dificuldade: values.dificuldade,
-            id: values.id,
         })
 
         form.reset()
 
     }
 
-    function onBadSubmit(values: z.infer<typeof pergunta_schema>) {
+    function onBadSubmit(values: z.infer<typeof pergunta_creation_schema>) {
         alert("Parametros invalidos")
+        console.log(values)
     }
 
 
-    const form = useForm<z.infer<typeof pergunta_schema>>({
+    const form = useForm<z.infer<typeof pergunta_creation_schema>>({
         mode: "onChange",
         defaultValues: {
             pergunta: "",
@@ -63,7 +63,7 @@ export default function inputQuestoes() {
             alt_correta: 1,
             dificuldade: 1
         },
-        resolver: zodResolver(pergunta_schema)
+        resolver: zodResolver(pergunta_creation_schema)
 
     });
 
