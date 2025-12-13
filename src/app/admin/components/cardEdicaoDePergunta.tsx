@@ -20,9 +20,9 @@ import { api } from "@/trpc/react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { FormField } from "@/components/ui/form"
-import { useContext } from "react"
+import { useContext, useState } from "react"
 
-export default function cardEdicaoDePergunta({ pergunta }: { pergunta: Pergunta }) {
+export default function cardEdicaoDePergunta({ pergunta, isVisible, onCancel }: { pergunta: Pergunta, isVisible: boolean, onCancel: Function}) {
 
     const mutation = api.pergunta.update.useMutation()
 
@@ -39,6 +39,7 @@ export default function cardEdicaoDePergunta({ pergunta }: { pergunta: Pergunta 
             dificuldade: values.dificuldade,
             id: values.id,
         })
+        onCancel()
     }
 
     function onBadSubmit(values: z.infer<typeof pergunta_schema>) {
@@ -65,13 +66,12 @@ export default function cardEdicaoDePergunta({ pergunta }: { pergunta: Pergunta 
     form.setValue("linguagem", linguagem)
 
     return (
-        <form onSubmit={form.handleSubmit(onSubmit, onBadSubmit)}>
-            <Card className="w-1/2 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0">
-
+        <form onSubmit={form.handleSubmit(onSubmit, onBadSubmit)} className={`w-1/2 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 ${isVisible ? 'visible' : 'invisible'}`}>
+            <Card >
                 <CardHeader>
                     <CardTitle>Editar pergunta</CardTitle>
                     <CardAction>
-                        <Button variant="link">Cancelar</Button>
+                        <Button variant="link" onClick={() => onCancel()}>Cancelar</Button>
                     </CardAction>
                 </CardHeader>
 

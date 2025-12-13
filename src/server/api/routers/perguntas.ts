@@ -1,13 +1,13 @@
 import z from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { pergunta_schema, type Pergunta } from "@/app/admin/pergutasTypo";
+import { pergunta_creation_schema, pergunta_schema, type Pergunta } from "@/app/admin/pergutasTypo";
 import type { Prisma } from "@prisma/client";
 
 
 export const perguntaRouter = createTRPCRouter({
     create: publicProcedure
-        .input(pergunta_schema)
+        .input(pergunta_creation_schema)
         .mutation(async ({ input, ctx }) => {
 
             const { pergunta, alternativa1, alternativa2, alternativa3, alternativa4, alt_correta, linguagem, dificuldade } = input;
