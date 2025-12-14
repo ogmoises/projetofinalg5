@@ -3,21 +3,13 @@
 import { type ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal } from "lucide-react"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import type { Pergunta } from "../pergutasTypo"
 import { api } from "@/trpc/react"
-import React, { createContext, useContext, useState } from "react"
-import CardEdicaoDePergunta from "./cardEdicaoDePergunta"
+import React from "react"
 
 
-
+//linguagem é a unica coluna que modifica o valor da celula já que é preciso pegá-los no backend
+//As outras podem usa-los como estão
 export const colunas: ColumnDef<Pergunta>[] = [
     {
         accessorKey: "linguagem",
@@ -37,6 +29,7 @@ export const colunas: ColumnDef<Pergunta>[] = [
             )
         }, */
         cell: ({ row }) => {
+            //Acessa o backend para pegar o nome da linguagem com aquele linguagem_id
             const linguagem = api.linguagens.findUniqueById.useQuery({ id: row.original.linguagem_id }).data?.nome!
             return <div>{linguagem}</div>
         },

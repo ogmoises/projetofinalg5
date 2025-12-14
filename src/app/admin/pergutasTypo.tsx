@@ -1,5 +1,6 @@
 import z from "zod"
 
+//Declaração do tipo Pergunta
 export interface Pergunta {
     id: number
     pergunta: string
@@ -12,6 +13,8 @@ export interface Pergunta {
     dificuldade: number
 }
 
+//Dois schemas de pergunta pois a criação não precisa de um id e as outras ações como editar precisam obrigatoriamente
+//Usar um tipo opcional não funcionou devido a obrigatoriedade do id em algumas situações
 export const pergunta_schema = z.object({
     id: z.number(),
     pergunta: z.string().min(1),

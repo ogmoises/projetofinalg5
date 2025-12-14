@@ -21,8 +21,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { DataTablePagination } from "./paginacaoTabelaDeQuestoes"
-import React, { useState } from "react"
-import { Input } from "@/components/ui/input"
+import React from "react"
 import { Separator } from "@/components/ui/separator"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
@@ -34,6 +33,8 @@ interface DataTableProps<TData, TValue> {
     data: TData[]
 }
 
+//As partes relacionadas a tabela são feitas com o template de Data-Table do shadcn disponível em https://ui.shadcn.com/docs/components/data-table 
+//Passamos um parametro a mais que é a função edit que será usado pelo botão de edição
 export default function TabelaDeQuestoes<TData, TValue>({
     columns,
     data,
@@ -78,6 +79,10 @@ export default function TabelaDeQuestoes<TData, TValue>({
             <div className="flex flex-col items-center pt-4">
                 <Table >
                     <TableHeader>
+                        {/* 
+                        Popula os headers da tabela usando a função map na lista de colunas passadas 
+                        Aqui acessa os headers, apenas o de dificuldade e perguntas foram modificados para permitir ordenação
+                        */}
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
@@ -97,6 +102,7 @@ export default function TabelaDeQuestoes<TData, TValue>({
                     </TableHeader>
 
                     <TableBody>
+                        {/* Agora popula cada coluna com os valores obtidos dos objetos passados */}
                         {table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
@@ -120,9 +126,11 @@ export default function TabelaDeQuestoes<TData, TValue>({
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                {/* Botão editar passa o objeto pergunta daquela linha para a função edit que lida com o card de edição */}
                                                 <DropdownMenuItem onClick={() => edit(row.original)}>
                                                     Editar
                                                 </DropdownMenuItem>
+                                                {/* O botão apagar chama a função mutate para deletar a pergunta com o id daquela pergunta */}
                                                 <DropdownMenuItem onClick={() => mutation.mutate({ id: row.original.id })}>
                                                     Apagar
                                                 </DropdownMenuItem>
