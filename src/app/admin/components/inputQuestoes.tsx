@@ -28,6 +28,7 @@ export default function inputQuestoes() {
 
     const mutation = api.pergunta.create.useMutation()
 
+    //Função que realiza a mutação para criar uma pergunta quando o botão submit é clicado
     function onSubmit(values: z.infer<typeof pergunta_creation_schema>) {
 
         mutation.mutate({
@@ -40,17 +41,15 @@ export default function inputQuestoes() {
             alt_correta: values.alt_correta,
             dificuldade: values.dificuldade,
         })
-
         form.reset()
 
     }
 
     function onBadSubmit(values: z.infer<typeof pergunta_creation_schema>) {
         alert("Parametros invalidos")
-        console.log(values)
     }
 
-
+    //Formulario com valores default invalidos para evitar erros
     const form = useForm<z.infer<typeof pergunta_creation_schema>>({
         mode: "onChange",
         defaultValues: {
