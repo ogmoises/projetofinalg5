@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function HeroSection() {
   return (
@@ -46,12 +47,18 @@ export default function HeroSection() {
             viewport={{ once: true }}
             transition={{ delay: 0.3, duration: 0.6 }}
           >
+            <Link href="/criarConta">
             <button className="bg-verde text-white font-bold py-3 px-8 rounded-full text-xl shadow-lg transform hover:scale-105 transition-transform hover:shadow-xl">
               Comece GRÁTIS
             </button>
+            </Link>
+
+            <Link href="/login">
             <button className="bg-roxo text-white font-bold py-3 px-8 rounded-full text-xl shadow-lg transform hover:scale-105 transition-transform hover:shadow-xl">
               Já tenho conta
             </button>
+            </Link>
+            
           </motion.div>
 
           <motion.div 
