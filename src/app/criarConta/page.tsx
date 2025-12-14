@@ -12,7 +12,7 @@ export default function CriarConta () {
         <Link href="/login">
         <Button 
           variant="outline" 
-          size="xl"
+          size="lg"
           className="h-14 text-md font-bold bg-white/90 backdrop-blur-sm text-verde border-white hover:bg-gray-50 hover:text-roxo shadow-md px-8"
         >
           Login
