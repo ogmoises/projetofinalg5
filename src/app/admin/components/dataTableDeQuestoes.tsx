@@ -66,7 +66,7 @@ export default function TabelaDeQuestoes<TData, TValue>({
         <div className="flex flex-col w-screen px-20">
             {/* <div className="items-center py-4">
                 <Input
-                    placeholder="Filtrar linguagem..."
+                    placeholder="Filter linguagens..."
                     value={(table.getColumn("linguagem")?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
                         table.getColumn("linguagem")?.setFilterValue(event.target.value)
