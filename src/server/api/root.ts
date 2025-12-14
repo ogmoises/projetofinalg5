@@ -1,6 +1,6 @@
-import { postRouter } from "@/server/api/routers/post";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
-import { questionRouter } from "@/server/api/routers/question";
+import { perguntaRouter } from "./routers/perguntas";
+import { linguagensRouter } from "./routers/linguagens";
 
 /**
  * This is the primary router for your server.
@@ -8,8 +8,8 @@ import { questionRouter } from "@/server/api/routers/question";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  post: postRouter,
-  question: questionRouter,
+  pergunta: perguntaRouter,
+  linguagens: linguagensRouter,
 });
 
 // export type definition of API

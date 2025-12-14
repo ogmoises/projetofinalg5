@@ -1,4 +1,3 @@
-// app/api/questions/route.ts
 import { NextRequest, NextResponse } from "next/server";//Caixa de tudo que o Cliente envia e oque é enviado de volta
 import { db } from "@/server/db";//Abre os arquivos do Banco de dados
 

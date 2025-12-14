@@ -1,4 +1,3 @@
-// app/pergunta/page.tsx
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -18,24 +17,24 @@ interface Pergunta {
 
 export default function PerguntaPage() {
   //=== ESTADOS PRINCIPAIS ===
-  const [selected, setSelected] = useState<null | number>(null); // Controla qual alternativa está selecionada (0-3 ou null)
-  const [confirmOpen, setConfirmOpen] = useState(false); // Controla se o modal de confirmação está aberto
-  const [loading, setLoading] = useState(false); // Controla estado de loading durante envio da resposta
-  const [question, setQuestion] = useState<Pergunta | null>(null); // Armazena a pergunta atual vinda da API
-  const [isLoadingQuestion, setIsLoadingQuestion] = useState(true); // Controla carregamento da pergunta
+  const [selected, setSelected] = useState<null | number>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [question, setQuestion] = useState<Pergunta | null>(null);
+  const [isLoadingQuestion, setIsLoadingQuestion] = useState(true);
   
   //=== NOVOS ESTADOS PARA PROGRESSO DINÂMICO ===
-  const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1); // Número da pergunta atual (1 a 10)
-  const [questionsAnswered, setQuestionsAnswered] = useState(0); // Quantidade total de perguntas respondidas na sessão
-  const [correctInSession, setCorrectInSession] = useState(0); // Quantidade de respostas corretas na sessão
-  const TOTAL_QUESTIONS_PER_SESSION = 10; // Meta: 10 perguntas por sessão
+  const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1);
+  const [questionsAnswered, setQuestionsAnswered] = useState(0);
+  const [correctInSession, setCorrectInSession] = useState(0);
+  const TOTAL_QUESTIONS_PER_SESSION = 5; //5 perguntas por quiz
   
   const router = useRouter();
   
   // Obter parâmetros da URL (linguagem e dificuldade)
-  const searchParams = useSearchParams();
-  const languageId = searchParams.get('languageId') || "1"; // ID da linguagem (default: 1 = Python)
-  const difficulty = searchParams.get('difficulty') || "1"; // Nível de dificuldade (default: 1 = Fácil)
+  const searchParams = useSearchParams();//Gancho para o Next escolher as perguntas
+  const languageId = searchParams.get('languageId') || "1";
+  const difficulty = searchParams.get('difficulty') || "1";
 
   // useEffect: Executa quando languageId ou difficulty mudam
   useEffect(() => {
@@ -43,57 +42,53 @@ export default function PerguntaPage() {
     setCurrentQuestionNumber(1);
     setQuestionsAnswered(0);
     setCorrectInSession(0);
-    fetchQuestion(); // Buscar nova pergunta
+    fetchQuestion();
   }, [languageId, difficulty]);
 
   // Função para buscar pergunta da API com os filtros atuais
   async function fetchQuestion() {
-    setIsLoadingQuestion(true); // Ativar loading
+    setIsLoadingQuestion(true);
     try {
       const response = await fetch(`/api/questions?languageId=${languageId}&difficulty=${difficulty}`);
       if (!response.ok) throw new Error("Erro ao buscar pergunta");
       const data = await response.json();
-      setQuestion(data); // Armazenar pergunta no estado
+      setQuestion(data);
     } catch (error) {
       console.error("Erro:", error);
       alert("Erro ao carregar pergunta");
     } finally {
-      setIsLoadingQuestion(false); // Desativar loading
+      setIsLoadingQuestion(false);
     }
   }
-
-  // Função para alternar seleção de alternativa
+  //Gerencia a seleção de alternativa
   function toggleOption(index: number) {
-    // Se clicar na alternativa já selecionada, desseleciona (null)
-    // Caso contrário, seleciona a nova alternativa
     setSelected((prev) => (prev === index ? null : index));
   }
-
-  // Função para abrir modal de confirmação (valida se algo foi selecionado)
+  //valida se o usuario confirmou a esocolha
   function handleOpenConfirm() {
     if (selected === null) {
       alert("Selecione uma opção antes de enviar.");
       return;
     }
-    setConfirmOpen(true); // Abre o modal
+    setConfirmOpen(true);
   }
 
   // Função principal: processa envio da resposta
   async function handleConfirmSend() {
     if (!question || selected === null) return;
     
-    setConfirmOpen(false); // Fecha modal
-    setLoading(true); // Ativa loading do botão
+    setConfirmOpen(false);
+    setLoading(true);
 
     try {
-      // Envia resposta para API
+      //
       const res = await fetch("/api/answers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           questionId: question.id,
           selectedAlternative: selected,
-          userId: 1, // TODO: Substituir pelo ID do usuário logado após implementar autenticação
+          userId: 1, // TODO: Substituir pelo ID do usuário logado
           languageId: parseInt(languageId),
           difficulty: parseInt(difficulty)
         }),
@@ -107,53 +102,74 @@ export default function PerguntaPage() {
         return;
       }
 
-      const result = await res.json(); // Processa resposta da API
+      const result = await res.json();
       
       //=== ATUALIZA ESTATÍSTICAS DA SESSÃO ===
-      setQuestionsAnswered(prev => prev + 1); // Incrementa total de respostas
+      setQuestionsAnswered(prev => prev + 1);
       if (result.isCorrect) {
-        setCorrectInSession(prev => prev + 1); // Incrementa acertos se correto
+        setCorrectInSession(prev => prev + 1);
       }
       
       // Mostrar resultado ao usuário
       if (result.isCorrect) {
-        alert(`Correto! +${result.pointsEarned} pontos`);
+        alert(`✅ Correto! +${result.pointsEarned} pontos`);
       } else {
-        alert(`Incorreto. A resposta certa era: Alternativa ${result.correctAlternative + 1}`);
+        alert(`❌ Incorreto. A resposta certa era: Alternativa ${result.correctAlternative + 1}`);
       }
 
-      // Aguarda 1.5 segundos e avança para próxima pergunta
+      // Aguarda 1.5 segundos e verifica se terminou o quiz
       setTimeout(() => {
-        // Avança número da pergunta (1 a 10, depois reinicia em 1)
-        setCurrentQuestionNumber(prev => 
-          prev >= TOTAL_QUESTIONS_PER_SESSION ? 1 : prev + 1
-        );
-        
-        fetchQuestion(); // Busca nova pergunta
-        setSelected(null); // Reseta seleção para próxima pergunta
+        // === VERIFICA SE É A ÚLTIMA PERGUNTA (5ª) ===
+        if (currentQuestionNumber >= TOTAL_QUESTIONS_PER_SESSION) {
+          // === SESSÃO COMPLETA: REDIRECIONA PARA ESCOLHA DE LINGUAGEM ===
+          
+          // Mostra resumo da sessão
+          const accuracy = questionsAnswered > 0 
+            ? Math.round((correctInSession / questionsAnswered) * 100) 
+            : 0;
+          
+          alert(`🎉 Quiz Completo!\nAcertos: ${correctInSession}/5\nPrecisão: ${accuracy}%\n\nRedirecionando para escolher novo quiz...`);
+          
+          // Redireciona após 1 segundo
+          setTimeout(() => {
+            router.push('/linguagem');
+          }, 1000);
+          
+        } else {
+          // === AINDA TEM PERGUNTAS: CONTINUA O QUIZ ===
+          
+          // Avança para próxima pergunta
+          setCurrentQuestionNumber(prev => prev + 1);
+          
+          // Busca nova pergunta
+          fetchQuestion();
+          
+          // Reseta seleção para próxima pergunta
+          setSelected(null);
+        }
       }, 1500);
 
     } catch (err) {
       console.error(err);
       alert("Erro de comunicação com o servidor.");
     } finally {
-      setLoading(false); // Desativa loading do botão
+      setLoading(false);
     }
   }
 
   //=== COMPONENTE DE BARRA DE PROGRESSO DINÂMICA ===
   const ProgressBar = () => {
-    // Calcula porcentagem de progresso (ex: pergunta 3 de 10 = 30%)
+    // Calcula porcentagem de progresso (ex: pergunta 3 de 5 = 60%)
     const progressPercentage = (currentQuestionNumber / TOTAL_QUESTIONS_PER_SESSION) * 100;
     
-    // Calcula precisão (% de acertos) se já respondeu alguma pergunta
+    // Calcula precisão (% de acertos)
     const accuracy = questionsAnswered > 0 
       ? Math.round((correctInSession / questionsAnswered) * 100) 
       : 0;
 
     return (
       <div className="mt-6 space-y-2">
-        {/* Barra de progresso principal - largura dinâmica baseada em progressPercentage */}
+        {/* Barra de progresso principal */}
         <div className="w-full bg-gray-200 rounded-full h-3">
           <div 
             className="bg-green-600 h-3 rounded-full transition-all duration-700"
@@ -161,7 +177,7 @@ export default function PerguntaPage() {
           ></div>
         </div>
         
-        {/* Painel de informações do progresso */}
+        {/* Informações do progresso */}
         <div className="flex justify-between text-sm">
           <div className="space-y-1">
             <p className="font-medium">
@@ -184,8 +200,15 @@ export default function PerguntaPage() {
           </div>
         </div>
 
-        {/* Mensagem motivacional condicional baseada na precisão */}
-        {questionsAnswered > 0 && (
+        {/* Mensagem especial para última pergunta */}
+        {currentQuestionNumber === TOTAL_QUESTIONS_PER_SESSION && (
+          <div className="text-xs text-center pt-2 text-blue-600 font-medium">
+            ⭐ Última pergunta! Boa sorte!
+          </div>
+        )}
+
+        {/* Mensagem motivacional */}
+        {questionsAnswered > 0 && currentQuestionNumber < TOTAL_QUESTIONS_PER_SESSION && (
           <div className="text-xs text-center pt-2">
             {accuracy === 100 ? "🎯 Perfeito! Continue assim!" :
              accuracy >= 80 ? "🌟 Excelente! Você está indo muito bem!" :
@@ -198,8 +221,6 @@ export default function PerguntaPage() {
   };
 
   //=== ESTADOS DE CARREGAMENTO E ERRO ===
-
-  // Estado de loading enquanto busca nova pergunta
   if (isLoadingQuestion) {
     return (
       <main className="relative min-h-screen flex items-center justify-center bg-white p-6">
@@ -211,7 +232,6 @@ export default function PerguntaPage() {
     );
   }
 
-  // Se API não retornou nenhuma pergunta (erro ou não existem perguntas)
   if (!question) {
     return (
       <main className="relative min-h-screen flex items-center justify-center bg-white p-6">
@@ -232,7 +252,7 @@ export default function PerguntaPage() {
   //=== RENDERIZAÇÃO PRINCIPAL ===
   return (
     <main className="relative min-h-screen flex items-center justify-center bg-white p-6">
-      {/* Logos decorativas nos 4 cantos da tela (estilo Duolingo) */}
+      {/* Logos */}
       <div className="absolute top-6 left-6 z-20">
         <Image src="/logoNaybar.png" alt="Logo esquerda" width={120} height={40} className="object-contain" priority />
       </div>
@@ -246,14 +266,13 @@ export default function PerguntaPage() {
         <Image src="/logoNaybar.png" alt="Logo esquerda" width={120} height={40} className="object-contain" priority />
       </div>
 
-      {/* Card principal da pergunta */}
+      {/* Card principal */}
       <div className="bg-white rounded-lg p-8 w-full max-w-3xl min-h-[60vh] text-center z-10 shadow-md mx-auto">
         <h1 className="text-4xl md:text-5xl font-bold mb-6">PERGUNTA</h1>
         
-        {/* Texto da pergunta vindo do banco de dados */}
         <p className="text-lg mb-8 px-4">{question.pergunta}</p>
 
-        {/* Grade 2x2 com as alternativas */}
+        {/* Alternativas */}
         <div className="grid grid-cols-2 gap-4">
           {Array.isArray(question.alternativa) && 
            question.alternativa.map((alt: string, index: number) => (
@@ -269,18 +288,18 @@ export default function PerguntaPage() {
           ))}
         </div>
 
-        {/* Metadados: Dificuldade e Linguagem (dinâmicos) */}
+        {/* Dificuldade e Linguagem */}
         <div className="mt-8 text-sm text-gray-500 flex justify-center gap-6">
           <span>Dificuldade: {question.dificuldade}</span>
           <span>•</span>
           <span>Linguagem: {question.linguagem?.nome || "Geral"}</span>
         </div>
 
-        {/* === BARRA DE PROGRESSO DINÂMICA (substitui a fixa) === */}
+        {/* Barra de Progresso */}
         <ProgressBar />
       </div>
 
-      {/* Botão "ENVIAR RESPOSTA" fixo na parte inferior */}
+      {/* Botão Enviar */}
       <div className="fixed left-0 right-0 bottom-6 flex justify-center z-30">
         <button
           onClick={handleOpenConfirm}
@@ -291,7 +310,7 @@ export default function PerguntaPage() {
         </button>
       </div>
 
-      {/* Modal de confirmação antes de enviar resposta */}
+      {/* Modal de confirmação */}
       <ConfirmModal
         open={confirmOpen}
         title="Tem certeza?"
