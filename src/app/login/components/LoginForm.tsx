@@ -12,7 +12,7 @@ interface LoginFormProps {
   redirectTo?: string;
 }
 
-export default function LoginForm({ onSuccess, redirectTo = "/" }: LoginFormProps) {
+export default function LoginForm({ onSuccess, redirectTo = "/linguagem" }: LoginFormProps) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);

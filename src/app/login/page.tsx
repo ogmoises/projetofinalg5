@@ -11,7 +11,7 @@ export default function Login() {
 
   const handleLoginSuccess = () => {
     
-    router.push("/");
+    router.push("/linguagem");
     router.refresh();
   };
 
@@ -58,7 +58,7 @@ export default function Login() {
       <h1 className="text-4xl font-bold text-preto mb-12 text-center">Entrar</h1>
       
       
-      <LoginForm onSuccess={handleLoginSuccess} redirectTo="/" />
+      <LoginForm onSuccess={handleLoginSuccess} redirectTo="/linguagem" />
       
       <div className="mt-20 w-full max-w-md px-4">
         <p className="text-sm text-center text-preto mb-6">
