@@ -21,22 +21,25 @@ import CardEdicaoDePergunta from "./cardEdicaoDePergunta"
 export const colunas: ColumnDef<Pergunta>[] = [
     {
         accessorKey: "linguagem",
-        header: ({ column }) => {
+        /* header: ({ column }) => {
             return (
                 <Button
                     variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    onClick={() => {
+                        column.toggleSorting(column.getIsSorted() === "asc")
+                        console.log(`isSorted: ${column.getIsSorted()}\n`)
+                        console.log(column.columnDef)
+                    }}
                 >
                     linguagem
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
-        },
+        }, */
         cell: ({ row }) => {
             const linguagem = api.linguagens.findUniqueById.useQuery({ id: row.original.linguagem_id }).data?.nome!
-            return <>{linguagem}</>
-
-        }
+            return <div>{linguagem}</div>
+        },
     },
     {
         accessorKey: "dificuldade",
