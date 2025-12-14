@@ -1,4 +1,3 @@
-// server/api/routers/question.ts
 import { z } from "zod";//Garante que o front envie dados de maneira correta
 //Cria o roteador e cria as funções publicas e privadas
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";

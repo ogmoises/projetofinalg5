@@ -1,35 +1,37 @@
 "use client"
 
 import { type ColumnDef } from "@tanstack/react-table"
-import Image from "next/image"
 import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import type { Pergunta } from "./pergutasTypo"
-import { MoreHorizontal } from "lucide-react"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import CardEdicaoDePergunta from "./cardEdicaoDePergunta"
+import type { Pergunta } from "../pergutasTypo"
+import { api } from "@/trpc/react"
+import React from "react"
 
 
+//linguagem é a unica coluna que modifica o valor da celula já que é preciso pegá-los no backend
+//As outras podem usa-los como estão
 export const colunas: ColumnDef<Pergunta>[] = [
     {
         accessorKey: "linguagem",
-        header: ({ column }) => {
+        /* header: ({ column }) => {
             return (
                 <Button
                     variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    onClick={() => {
+                        column.toggleSorting(column.getIsSorted() === "asc")
+                        console.log(`isSorted: ${column.getIsSorted()}\n`)
+                        console.log(column.columnDef)
+                    }}
                 >
                     linguagem
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
+        }, */
+        cell: ({ row }) => {
+            //Acessa o backend para pegar o nome da linguagem com aquele linguagem_id
+            const linguagem = api.linguagens.findUniqueById.useQuery({ id: row.original.linguagem_id }).data?.nome!
+            return <div>{linguagem}</div>
         },
     },
     {
@@ -62,53 +64,23 @@ export const colunas: ColumnDef<Pergunta>[] = [
 
     },
     {
-        accessorKey: "opcao1",
-        header: "Opção 1",
+        accessorKey: "alternativa1",
+        header: "Alt 1",
     },
     {
-        accessorKey: "opcao2",
-        header: "Opção 2",
+        accessorKey: "alternativa2",
+        header: "Alt 2",
     },
     {
-        accessorKey: "opcao3",
-        header: "Opção 3",
+        accessorKey: "alternativa3",
+        header: "Alt 3",
     },
     {
-        accessorKey: "opcao4",
-        header: "Opção 4",
+        accessorKey: "alternativa4",
+        header: "Alt 4",
     },
     {
-        accessorKey: "opcao5",
-        header: "Opção 5",
-    },
-    {
-        accessorKey: "correta",
+        accessorKey: "alt_correta",
         header: "Correta",
-    },
-    {
-        id: "actions",
-        cell: ({ row }) => {
-            const pergunta = row.original
-
-            return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem >
-                            Editar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                            Apagar
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            )
-        },
     },
 ]

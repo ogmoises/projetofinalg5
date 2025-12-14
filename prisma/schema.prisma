@@ -109,7 +109,7 @@ model Perguntas {
 
 model Linguagem {
     id   Int    @id @default(autoincrement())
-    nome String
+    nome String @unique
 
     perguntas Perguntas[]
 }

@@ -1,5 +1,3 @@
-// app/api/answers/route.ts - API para processar respostas dos usuários
-
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/server/db"; // Conexão com o banco de dados (Prisma Client)
 
