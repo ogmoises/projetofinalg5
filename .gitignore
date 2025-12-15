@@ -45,3 +45,4 @@ yarn-error.log*
 # idea files
 .ideaprisma/dev.db
 prisma/dev.db-journal
+.npmrc
