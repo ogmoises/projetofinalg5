@@ -3,6 +3,7 @@
 import Navbar from "./Navbar";
 import HeroSection from "./HeroSection";
 import CursosSection from "./Cursos";
+import PorqueCodeLingoSection from "./PorqueCodeLingo";
 import FAQSection from "./FAQSection";
 import SobreNosSection from "./SobreNos";
 import ContatoSection from "./Contato";
@@ -25,6 +26,7 @@ export default function LandingPage() {
       <Navbar scrollToSection={scrollToSection} scrollToTop={scrollToTop} />
       <HeroSection />
       <CursosSection />
+      <PorqueCodeLingoSection />
       <SobreNosSection />
       <FAQSection />
       <ContatoSection />

@@ -10,9 +10,23 @@ import { useRouter } from "next/navigation";
 
 export default function NiveisPage() {
   const router = useRouter();
-  const [userId, setUserId] = useState(1); // Simulando usuário logado
+  const [userId, setUserId] = useState<number | null>(null);
 
-  const { data: stats, isLoading } = api.usuario.getStats.useQuery({ id: userId });
+  // Pega o userId do sessionStorage
+  useEffect(() => {
+    const storedUserId = sessionStorage.getItem("userId");
+    if (storedUserId) {
+      setUserId(parseInt(storedUserId));
+    } else {
+      // Se não tiver usuário logado, redireciona
+      router.push("/login");
+    }
+  }, [router]);
+
+  const { data: stats, isLoading } = api.usuario.getStats.useQuery(
+    { id: userId! },
+    { enabled: !!userId }
+  );
 
   // Calcular nível baseado na pontuação
   const calcularNivel = (pontos: number) => {
