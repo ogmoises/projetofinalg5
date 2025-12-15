@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaChevronDown } from "react-icons/fa";
-
+import { useRouter } from "next/navigation";
 
 const faqData = [
   {
@@ -31,19 +31,17 @@ const faqData = [
     pergunta: "A plataforma é gratuita?",
     resposta: "Sim! Oferecemos um plano gratuito robusto com acesso a todas as linguagens básicas e centenas de exercícios. Temos também planos premium com recursos avançados, projetos exclusivos e mentorias personalizadas."
   },
-  
   {
-    id: 7,
+    id: 6,
     pergunta: "Há certificados ao completar os cursos?",
     resposta: "Sim! Ao concluir cada trilha de aprendizado, você recebe um certificado digital verificável que pode compartilhar no LinkedIn e adicionar ao seu currículo."
   },
   {
-    id: 8,
+    id: 7,
     pergunta: "Como é o suporte para dúvidas?",
     resposta: "Oferecemos suporte através de chat integrado, fórum da comunidade e, para planos premium, mentorias ao vivo com programadores experientes. Nenhuma dúvida fica sem resposta!"
   }
 ];
-
 
 const FAQItem = ({ pergunta, resposta, isOpen, onClick }: { 
   pergunta: string; 
@@ -90,8 +88,8 @@ const FAQItem = ({ pergunta, resposta, isOpen, onClick }: {
   );
 };
 
-// Componente principal do FAQ
 export default function FAQSection() {
+  const router = useRouter();
   const [openItem, setOpenItem] = useState<number | null>(1);
 
   const toggleItem = (id: number) => {
@@ -100,7 +98,6 @@ export default function FAQSection() {
 
   return (
     <section id="faq" className="w-full py-20 bg-branco relative overflow-hidden">
-      {/* Elemento decorativo */}
       <div className="absolute top-0 left-0 z-0 opacity-50">
         <div className="w-64 h-64 bg-verde rounded-full -translate-x-32 -translate-y-32"></div>
       </div>
@@ -110,7 +107,6 @@ export default function FAQSection() {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        {/* Cabeçalho do FAQ */}
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -127,7 +123,6 @@ export default function FAQSection() {
           </p>
         </motion.div>
 
-        {/* Lista de FAQs */}
         <motion.div 
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -146,7 +141,6 @@ export default function FAQSection() {
           ))}
         </motion.div>
 
-        {/* CTA no final do FAQ */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -158,10 +152,19 @@ export default function FAQSection() {
             Ainda tem dúvidas?
           </p>
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
-            <button className="bg-verde text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transform hover:scale-105 transition-transform hover:shadow-xl">
+            <button 
+              onClick={() => {
+                const element = document.getElementById("contato");
+                if (element) element.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="bg-verde text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transform hover:scale-105 transition-transform hover:shadow-xl"
+            >
               Fale Conosco
             </button>
-            <button className="border-2 border-roxo text-roxo font-bold py-3 px-8 rounded-full text-lg transform hover:scale-105 transition-transform hover:bg-roxo/5">
+            <button 
+              onClick={() => router.push("/linguagem")}
+              className="border-2 border-roxo text-roxo font-bold py-3 px-8 rounded-full text-lg transform hover:scale-105 transition-transform hover:bg-roxo/5"
+            >
               Ver Cursos
             </button>
           </div>

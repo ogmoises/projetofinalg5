@@ -1,56 +1,31 @@
-"use client";
-import React, { useEffect } from "react";
-
-type Props = {
+interface ConfirmModalProps {
   open: boolean;
-  title?: string;
-  description?: string;
+  title: string;
+  description: string;
   onConfirm: () => void;
   onCancel: () => void;
-};
+}
 
-export default function ConfirmModal({ open, title = "Tem certeza?", description = "", onConfirm, onCancel }: Props) {
-  
-  useEffect(() => {
-    if (open) {
-      document.documentElement.style.overflow = "hidden";
-    } else {
-      document.documentElement.style.overflow = "";
-    }
-    return () => {
-      document.documentElement.style.overflow = "";
-    };
-  }, [open]);
-
+export default function ConfirmModal({ open, title, description, onConfirm, onCancel }: ConfirmModalProps) {
   if (!open) return null;
-/////////
+
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center px-4 sm:px-6"
-    >
-      {/* Fundo semi-transparente */}
-      <div className="absolute inset-0 bg-black/50" onClick={onCancel} />
-
-      {/* Caixa do modal */}
-      <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6 z-10">
-        <h2 className="text-xl font-semibold mb-2">{title}</h2>
-        {description ? <p className="text-sm text-gray-600 mb-4">{description}</p> : null}
-
-        <div className="flex gap-3 justify-end">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-sm mx-4">
+        <h3 className="text-xl font-bold mb-2">{title}</h3>
+        <p className="text-gray-600 mb-6">{description}</p>
+        <div className="flex justify-end space-x-4">
           <button
             onClick={onCancel}
-            className="px-4 py-2 rounded-md border bg-gray-100 hover:bg-gray-200"
+            className="px-4 py-2 text-gray-600 hover:text-gray-800"
           >
-            Não
+            Cancelar
           </button>
-
           <button
             onClick={onConfirm}
-            className="px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-700"
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
           >
-            Sim
+            Confirmar
           </button>
         </div>
       </div>
