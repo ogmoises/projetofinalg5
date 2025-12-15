@@ -2,8 +2,11 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export default function HeroSection() {
+  const router = useRouter();
+
   return (
     <section className="container mx-auto flex-1 flex items-center py-12 lg:py-24 z-10 mt-16 w-full">
       <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
@@ -46,10 +49,16 @@ export default function HeroSection() {
             viewport={{ once: true }}
             transition={{ delay: 0.3, duration: 0.6 }}
           >
-            <button className="bg-verde text-white font-bold py-3 px-8 rounded-full text-xl shadow-lg transform hover:scale-105 transition-transform hover:shadow-xl">
+            <button 
+              onClick={() => router.push("/linguagem")}
+              className="bg-verde text-white font-bold py-3 px-8 rounded-full text-xl shadow-lg transform hover:scale-105 transition-transform hover:shadow-xl"
+            >
               Comece GRÁTIS
             </button>
-            <button className="bg-roxo text-white font-bold py-3 px-8 rounded-full text-xl shadow-lg transform hover:scale-105 transition-transform hover:shadow-xl">
+            <button 
+              onClick={() => router.push("/login")}
+              className="bg-roxo text-white font-bold py-3 px-8 rounded-full text-xl shadow-lg transform hover:scale-105 transition-transform hover:shadow-xl"
+            >
               Já tenho conta
             </button>
           </motion.div>
@@ -69,6 +78,5 @@ export default function HeroSection() {
         </div>
       </div>
     </section>
-    
   );
 }

@@ -3,6 +3,7 @@
 import { FaStar, FaHeart, FaMobileAlt, FaLaptop } from "react-icons/fa";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 const cursosData = [
   {
@@ -44,6 +45,8 @@ const cursosData = [
 ];
 
 export default function CursosSection() {
+  const router = useRouter();
+
   return (
     <>
       <div className="w-full -mt-40">
@@ -56,7 +59,7 @@ export default function CursosSection() {
         />
       </div>
 
-      <section id="cursos" className="w-full bg-branco pt-20 pb-48 lg:pt-12 lg:pb-64 relative overflow-visible">
+      <section id="cursos" className="w-full bg-branco pt-20 pb-48 lg:pt-12 lg:pb-32 relative overflow-visible">
         <div className="container mx-auto lg:px-16 relative z-10">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
@@ -90,6 +93,28 @@ export default function CursosSection() {
               </motion.div>
             ))}
           </div>
+
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.6, duration: 0.6 }}
+            className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 justify-center mt-16"
+          >
+            <button
+              onClick={() => router.push("/linguagem")}
+              className="bg-gradient-to-r from-verde to-verde/80 text-white font-bold py-4 px-10 rounded-full text-xl shadow-lg transform hover:scale-105 transition-all hover:shadow-2xl"
+            >
+              Escolher Linguagem
+            </button>
+            <button
+              onClick={() => router.push("/quiz")}
+              className="bg-gradient-to-r from-roxo to-roxo/80 text-white font-bold py-4 px-10 rounded-full text-xl shadow-lg transform hover:scale-105 transition-all hover:shadow-2xl"
+            >
+              Fazer Quiz Agora
+            </button>
+          </motion.div>
         </div>
       </section>
     </>
