@@ -11,7 +11,7 @@ export interface Usuario {
 
 export const usuarioRouter = createTRPCRouter({
     // Criar usuário
-    create: publicProcedure
+    criar: publicProcedure
         .input(z.object({ 
             email: z.string().email(),
             senha: z.string().min(6),
