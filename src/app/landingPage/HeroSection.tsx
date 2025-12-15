@@ -3,8 +3,11 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function HeroSection() {
+  const router = useRouter();
+
   return (
     <section className="container mx-auto flex-1 flex items-center py-12 lg:py-24 z-10 mt-16 w-full">
       <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
@@ -76,6 +79,5 @@ export default function HeroSection() {
         </div>
       </div>
     </section>
-    
   );
 }
