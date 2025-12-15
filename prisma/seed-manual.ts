@@ -18,26 +18,18 @@ async function main() {
   });
   console.log("✅ Usuário criado:", usuario.nick);
 
-  // Linguagens - Correção implementada
-  let python = await prisma.linguagem.findFirst({
-    where: { nome: "Python" }
+  // Linguagens
+  const python = await prisma.linguagem.upsert({
+    where: { nome: "Python" },
+    update: {},
+    create: { nome: "Python" },
   });
-  
-  if (!python) {
-    python = await prisma.linguagem.create({
-      data: { nome: "Python" }
-    });
-  }
 
-  let javascript = await prisma.linguagem.findFirst({
-    where: { nome: "JavaScript" }
+  const javascript = await prisma.linguagem.upsert({
+    where: { nome: "JavaScript" },
+    update: {},
+    create: { nome: "JavaScript" },
   });
-  
-  if (!javascript) {
-    javascript = await prisma.linguagem.create({
-      data: { nome: "JavaScript" }
-    });
-  }
   console.log("✅ Linguagens criadas");
 
   // Perguntas Python

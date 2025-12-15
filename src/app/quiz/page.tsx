@@ -1,151 +1,225 @@
 "use client";
+
 import { useState, useEffect } from "react";
-import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import { api } from "@/trpc/react";
+import SimpleNavbar from "@/components/ui/SimpleNavbar";
+import { FaCheckCircle, FaTimesCircle, FaTrophy, FaArrowRight } from "react-icons/fa";
 import { useRouter, useSearchParams } from "next/navigation";
 import ConfirmModal from "./components/ConfirmModal";
 
-//====Estrutura das "Perguntas" que irão aparecer no front
 interface Pergunta {
   id: number;
   pergunta: string;
-  alternativa: string[];
+  alternativa1: string;
+  alternativa2: string;
+  alternativa3: string;
+  alternativa4: string;
+  alt_correta: number;
   dificuldade: number;
-  linguagem?: {
-    nome: string;
-  };
+  linguagem_id?: number;
 }
 
-export default function PerguntaPage() {
-  //=== ESTADOS PRINCIPAIS ===
-  const [selected, setSelected] = useState<null | number>(null);
+export default function QuizPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Estados do quiz
+  const [userId] = useState(1);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [isAnswered, setIsAnswered] = useState(false);
+  const [score, setScore] = useState(0);
+  const [quizCompleted, setQuizCompleted] = useState(false);
+  
+  // Estados do modal de confirmação
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [question, setQuestion] = useState<Pergunta | null>(null);
-  const [isLoadingQuestion, setIsLoadingQuestion] = useState(true);
   
-  //=== NOVOS ESTADOS PARA PROGRESSO DINÂMICO ===
-  const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1);
+  // Estados de progresso
   const [questionsAnswered, setQuestionsAnswered] = useState(0);
   const [correctInSession, setCorrectInSession] = useState(0);
-  const TOTAL_QUESTIONS_PER_SESSION = 5; //5 perguntas por quiz
   
-  const router = useRouter();
-  
-  // Obter parâmetros da URL (linguagem e dificuldade)
-  const searchParams = useSearchParams();//Gancho para o Next escolher as perguntas
+  // ⚡ NÚMERO FIXO DE QUESTÕES - SEMPRE 5
+  const TOTAL_QUESTIONS = 5;
+
+  // Obter parâmetros da URL
   const languageId = searchParams.get('languageId') || "1";
   const difficulty = searchParams.get('difficulty') || "1";
 
-  // useEffect: Executa quando languageId ou difficulty mudam
+  // Buscar perguntas com tRPC
+  const { data: perguntas, isLoading } = api.pergunta.list.useQuery();
+
+  const registrarResposta = api.usuario.registrarResposta.useMutation();
+
+  // ⚡ FUNÇÃO MELHORADA PARA SELECIONAR PERGUNTAS
+  const getQuizQuestions = (): Pergunta[] => {
+    if (!perguntas) return [];
+    
+    const languageIdNum = parseInt(languageId);
+    const difficultyNum = parseInt(difficulty);
+    
+    // 1. Primeiro tenta encontrar perguntas com a combinação EXATA
+    const exactMatches = perguntas.filter((p: Pergunta) => 
+      p.linguagem_id === languageIdNum && p.dificuldade === difficultyNum
+    );
+    
+    // 2. Se não houver suficientes, busca da mesma linguagem (qualquer dificuldade)
+    if (exactMatches.length < TOTAL_QUESTIONS) {
+      const sameLanguage = perguntas.filter((p: Pergunta) => 
+        p.linguagem_id === languageIdNum
+      );
+      
+      // Combina as exatas com outras da mesma linguagem
+      const combined = [...exactMatches];
+      sameLanguage.forEach(p => {
+        if (!combined.find(q => q.id === p.id) && combined.length < TOTAL_QUESTIONS) {
+          combined.push(p);
+        }
+      });
+      
+      // 3. Se ainda não houver suficientes, pega qualquer pergunta
+      if (combined.length < TOTAL_QUESTIONS) {
+        perguntas.forEach(p => {
+          if (!combined.find(q => q.id === p.id) && combined.length < TOTAL_QUESTIONS) {
+            combined.push(p);
+          }
+        });
+      }
+      
+      return combined.slice(0, TOTAL_QUESTIONS);
+    }
+    
+    // 4. Se tiver 5 ou mais exatas, pega as primeiras 5
+    return exactMatches.slice(0, TOTAL_QUESTIONS);
+  };
+
+  // ⚡ LOCAL ONDE É SELECIONADO O NÚMERO DE QUESTÕES
+  const quizQuestions = getQuizQuestions();
+
+  // Resetar progresso quando mudar linguagem/dificuldade
   useEffect(() => {
-    // Resetar progresso da sessão ao mudar linguagem ou dificuldade
-    setCurrentQuestionNumber(1);
+    setCurrentQuestionIndex(0);
+    setSelectedAnswer(null);
+    setIsAnswered(false);
+    setScore(0);
+    setQuizCompleted(false);
     setQuestionsAnswered(0);
     setCorrectInSession(0);
-    fetchQuestion();
   }, [languageId, difficulty]);
 
-  // Função para buscar pergunta da API com os filtros atuais
-  async function fetchQuestion() {
-    setIsLoadingQuestion(true);
-    try {
-      const response = await fetch(`/api/questions?languageId=${languageId}&difficulty=${difficulty}`);
-      if (!response.ok) throw new Error("Erro ao buscar pergunta");
-      const data = await response.json();
-      setQuestion(data);
-    } catch (error) {
-      console.error("Erro:", error);
-      alert("Erro ao carregar pergunta");
-    } finally {
-      setIsLoadingQuestion(false);
-    }
+  if (isLoading || !perguntas) {
+    return (
+      <div className="flex flex-col h-screen">
+        <SimpleNavbar />
+        <div className="flex-1 flex items-center justify-center bg-branco">
+          <div className="text-2xl text-roxo font-bold animate-pulse">Preparando quiz...</div>
+        </div>
+      </div>
+    );
   }
-  //Gerencia a seleção de alternativa
-  function toggleOption(index: number) {
-    setSelected((prev) => (prev === index ? null : index));
+
+  // ⚡ VERIFICAÇÃO ATUALIZADA
+  if (quizQuestions.length < TOTAL_QUESTIONS) {
+    const needed = TOTAL_QUESTIONS - quizQuestions.length;
+    return (
+      <div className="flex flex-col h-screen">
+        <SimpleNavbar />
+        <div className="flex-1 flex items-center justify-center bg-branco">
+          <div className="text-center">
+            <p className="text-2xl text-preto mb-4">
+              {quizQuestions.length === 0 
+                ? "Nenhuma pergunta disponível." 
+                : `Apenas ${quizQuestions.length} pergunta(s) disponível(is).`}
+            </p>
+            <p className="text-gray-500 mb-6">
+              São necessárias {TOTAL_QUESTIONS} perguntas para o quiz.
+              {needed > 0 && ` Faltam ${needed} pergunta(s).`}
+            </p>
+            <p className="text-gray-500 mb-6">
+              Linguagem: {languageId} | Dificuldade: {difficulty}
+            </p>
+            <div className="space-y-4">
+              <button
+                onClick={() => router.push("/linguagem")}
+                className="bg-roxo text-white px-8 py-3 rounded-full font-bold hover:bg-roxo/90 block mx-auto"
+              >
+                Escolher Outra Linguagem
+              </button>
+              {quizQuestions.length > 0 && (
+                <button
+                  onClick={() => {
+                    // Aceita fazer o quiz com menos perguntas
+                    alert(`Iniciando quiz com ${quizQuestions.length} pergunta(s).`);
+                  }}
+                  className="bg-verde text-white px-8 py-3 rounded-full font-bold hover:bg-verde/90 block mx-auto"
+                >
+                  Iniciar com {quizQuestions.length} Pergunta(s)
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
-  //valida se o usuario confirmou a esocolha
-  function handleOpenConfirm() {
-    if (selected === null) {
+
+  const currentQuestion = quizQuestions[currentQuestionIndex];
+  const alternatives = [
+    { id: 0, text: currentQuestion?.alternativa1 },
+    { id: 1, text: currentQuestion?.alternativa2 },
+    { id: 2, text: currentQuestion?.alternativa3 },
+    { id: 3, text: currentQuestion?.alternativa4 },
+  ];
+
+  const handleAnswerSelect = (alternativeId: number) => {
+    if (isAnswered) return;
+    setSelectedAnswer(alternativeId);
+  };
+
+  const handleOpenConfirm = () => {
+    if (selectedAnswer === null) {
       alert("Selecione uma opção antes de enviar.");
       return;
     }
     setConfirmOpen(true);
-  }
+  };
 
-  // Função principal: processa envio da resposta
-  async function handleConfirmSend() {
-    if (!question || selected === null) return;
+  const handleConfirmSend = async () => {
+    if (!currentQuestion || selectedAnswer === null) return;
     
     setConfirmOpen(false);
     setLoading(true);
+    setIsAnswered(true);
 
     try {
-      //
-      const res = await fetch("/api/answers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          questionId: question.id,
-          selectedAlternative: selected,
-          userId: 1, // TODO: Substituir pelo ID do usuário logado
-          languageId: parseInt(languageId),
-          difficulty: parseInt(difficulty)
-        }),
+      const isCorrect = selectedAnswer === currentQuestion!.alt_correta;
+      
+      await registrarResposta.mutateAsync({
+        usuario_id: userId,
+        perguntas_id: currentQuestion!.id,
+        alt_selecionado: selectedAnswer,
+        acertou: isCorrect,
       });
 
-      if (!res.ok) {
-        const error = await res.text();
-        console.error("Erro no envio:", error);
-        alert("Erro ao enviar a resposta. Tente novamente.");
-        setLoading(false);
-        return;
-      }
-
-      const result = await res.json();
-      
-      //=== ATUALIZA ESTATÍSTICAS DA SESSÃO ===
+      // Atualizar estatísticas
       setQuestionsAnswered(prev => prev + 1);
-      if (result.isCorrect) {
+      if (isCorrect) {
+        setScore(score + 1);
         setCorrectInSession(prev => prev + 1);
       }
-      
-      // Mostrar resultado ao usuário
-      if (result.isCorrect) {
-        alert(`✅ Correto! +${result.pointsEarned} pontos`);
-      } else {
-        alert(`❌ Incorreto. A resposta certa era: Alternativa ${result.correctAlternative + 1}`);
-      }
 
-      // Aguarda 1.5 segundos e verifica se terminou o quiz
+      // Aguardar 1.5 segundos antes de prosseguir
       setTimeout(() => {
-        // === VERIFICA SE É A ÚLTIMA PERGUNTA (5ª) ===
-        if (currentQuestionNumber >= TOTAL_QUESTIONS_PER_SESSION) {
-          // === SESSÃO COMPLETA: REDIRECIONA PARA ESCOLHA DE LINGUAGEM ===
-          
-          // Mostra resumo da sessão
-          const accuracy = questionsAnswered > 0 
-            ? Math.round((correctInSession / questionsAnswered) * 100) 
-            : 0;
-          
-          alert(`🎉 Quiz Completo!\nAcertos: ${correctInSession}/5\nPrecisão: ${accuracy}%\n\nRedirecionando para escolher novo quiz...`);
-          
-          // Redireciona após 1 segundo
-          setTimeout(() => {
-            router.push('/linguagem');
-          }, 1000);
-          
+        // Verificar se é a última pergunta
+        if (currentQuestionIndex >= quizQuestions.length - 1) {
+          // QUIZ COMPLETO
+          setQuizCompleted(true);
         } else {
-          // === AINDA TEM PERGUNTAS: CONTINUA O QUIZ ===
-          
-          // Avança para próxima pergunta
-          setCurrentQuestionNumber(prev => prev + 1);
-          
-          // Busca nova pergunta
-          fetchQuestion();
-          
-          // Reseta seleção para próxima pergunta
-          setSelected(null);
+          // Avançar para próxima pergunta
+          setCurrentQuestionIndex(prev => prev + 1);
+          setSelectedAnswer(null);
+          setIsAnswered(false);
         }
       }, 1500);
 
@@ -155,160 +229,171 @@ export default function PerguntaPage() {
     } finally {
       setLoading(false);
     }
-  }
-
-  //=== COMPONENTE DE BARRA DE PROGRESSO DINÂMICA ===
-  const ProgressBar = () => {
-    // Calcula porcentagem de progresso (ex: pergunta 3 de 5 = 60%)
-    const progressPercentage = (currentQuestionNumber / TOTAL_QUESTIONS_PER_SESSION) * 100;
-    
-    // Calcula precisão (% de acertos)
-    const accuracy = questionsAnswered > 0 
-      ? Math.round((correctInSession / questionsAnswered) * 100) 
-      : 0;
-
-    return (
-      <div className="mt-6 space-y-2">
-        {/* Barra de progresso principal */}
-        <div className="w-full bg-gray-200 rounded-full h-3">
-          <div 
-            className="bg-green-600 h-3 rounded-full transition-all duration-700"
-            style={{ width: `${progressPercentage}%` }}
-          ></div>
-        </div>
-        
-        {/* Informações do progresso */}
-        <div className="flex justify-between text-sm">
-          <div className="space-y-1">
-            <p className="font-medium">
-              Pergunta <span className="text-green-600">{currentQuestionNumber}</span> de {TOTAL_QUESTIONS_PER_SESSION}
-            </p>
-            <p className="text-xs text-gray-500">
-              Sessão: {questionsAnswered} respondidas
-            </p>
-          </div>
-          
-          <div className="text-right space-y-1">
-            <p className="font-medium">
-              Precisão: <span className={accuracy >= 70 ? "text-green-600" : "text-yellow-600"}>
-                {accuracy}%
-              </span>
-            </p>
-            <p className="text-xs text-gray-500">
-              {correctInSession} corretas • {questionsAnswered - correctInSession} erradas
-            </p>
-          </div>
-        </div>
-
-        {/* Mensagem especial para última pergunta */}
-        {currentQuestionNumber === TOTAL_QUESTIONS_PER_SESSION && (
-          <div className="text-xs text-center pt-2 text-blue-600 font-medium">
-            ⭐ Última pergunta! Boa sorte!
-          </div>
-        )}
-
-        {/* Mensagem motivacional */}
-        {questionsAnswered > 0 && currentQuestionNumber < TOTAL_QUESTIONS_PER_SESSION && (
-          <div className="text-xs text-center pt-2">
-            {accuracy === 100 ? "🎯 Perfeito! Continue assim!" :
-             accuracy >= 80 ? "🌟 Excelente! Você está indo muito bem!" :
-             accuracy >= 60 ? "👍 Bom trabalho! Quase lá!" :
-             "💪 Continue praticando, você consegue!"}
-          </div>
-        )}
-      </div>
-    );
   };
 
-  //=== ESTADOS DE CARREGAMENTO E ERRO ===
-  if (isLoadingQuestion) {
+  if (quizCompleted) {
+    const percentage = (score / quizQuestions.length) * 100;
     return (
-      <main className="relative min-h-screen flex items-center justify-center bg-white p-6">
-        <div className="text-center p-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-lg">Carregando pergunta...</p>
-        </div>
-      </main>
-    );
-  }
-
-  if (!question) {
-    return (
-      <main className="relative min-h-screen flex items-center justify-center bg-white p-6">
-        <div className="text-center p-8">
-          <h2 className="text-2xl font-bold mb-4">Pergunta não encontrada</h2>
-          <p className="mb-6">Não há perguntas disponíveis para esta combinação de linguagem e dificuldade.</p>
-          <button
-            onClick={() => router.push('/escolha-linguagem')}
-            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-full"
+      <div className="flex flex-col min-h-screen bg-gradient-to-b from-branco to-verde/10">
+        <SimpleNavbar />
+        <div className="flex-1 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white rounded-3xl shadow-2xl p-12 text-center max-w-2xl border-4 border-verde"
           >
-            Voltar para escolha
-          </button>
+            <FaTrophy className="text-8xl text-yellow-500 mx-auto mb-6 animate-bounce" />
+            <h1 className="text-5xl font-bold text-preto mb-4">Quiz Completo! 🎉</h1>
+            <p className="text-3xl text-preto/80 mb-8">
+              Você acertou <span className="text-verde font-bold">{score}</span> de{" "}
+              <span className="font-bold">{TOTAL_QUESTIONS}</span> perguntas
+            </p>
+
+            <div className="bg-gradient-to-r from-verde/20 to-roxo/20 rounded-2xl p-6 mb-8">
+              <p className="text-6xl font-bold text-preto mb-2">{percentage.toFixed(0)}%</p>
+              <p className="text-xl text-preto/70">Taxa de Acerto</p>
+            </div>
+
+            <div className="flex space-x-4 justify-center">
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-verde text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-verde/90 transform hover:scale-105 transition-all"
+              >
+                Tentar Novamente
+              </button>
+              <button
+                onClick={() => router.push("/linguagem")}
+                className="bg-roxo text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-roxo/90 transform hover:scale-105 transition-all"
+              >
+                Escolher Nova Linguagem
+              </button>
+            </div>
+          </motion.div>
         </div>
-      </main>
+      </div>
     );
   }
 
-  //=== RENDERIZAÇÃO PRINCIPAL ===
   return (
-    <main className="relative min-h-screen flex items-center justify-center bg-white p-6">
-      {/* Logos */}
-      <div className="absolute top-6 left-6 z-20">
-        <Image src="/logoNaybar.png" alt="Logo esquerda" width={120} height={40} className="object-contain" priority />
-      </div>
-      <div className="absolute top-6 right-6 z-20">
-        <Image src="/logoNaybar.png" alt="Logo direita" width={120} height={40} className="object-contain" priority />
-      </div>
-      <div className="absolute bottom-6 right-6 z-20">
-        <Image src="/logoNaybar.png" alt="Logo direita" width={120} height={40} className="object-contain" priority />
-      </div>
-      <div className="absolute bottom-6 left-6 z-20">
-        <Image src="/logoNaybar.png" alt="Logo esquerda" width={120} height={40} className="object-contain" priority />
-      </div>
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-branco to-roxo/5">
+      <SimpleNavbar />
 
-      {/* Card principal */}
-      <div className="bg-white rounded-lg p-8 w-full max-w-3xl min-h-[60vh] text-center z-10 shadow-md mx-auto">
-        <h1 className="text-4xl md:text-5xl font-bold mb-6">PERGUNTA</h1>
-        
-        <p className="text-lg mb-8 px-4">{question.pergunta}</p>
-
-        {/* Alternativas */}
-        <div className="grid grid-cols-2 gap-4">
-          {Array.isArray(question.alternativa) && 
-           question.alternativa.map((alt: string, index: number) => (
-            <button
-              key={index}
-              onClick={() => toggleOption(index)}
-              className={`w-full flex items-center justify-center rounded-lg border transition-colors text-lg
-                ${selected === index ? "bg-green-500 text-white border-green-600" : "bg-gray-100 hover:bg-gray-200"}
-                h-28 sm:h-32 md:h-36 p-4`}
-            >
-              <span className="truncate">{alt}</span>
-            </button>
-          ))}
+      <main className="flex-1 container mx-auto px-4 py-8">
+        {/* BARRA DE PROGRESSO - SEMPRE MOSTRA 5 PERGUNTAS */}
+        <div className="max-w-4xl mx-auto mb-8">
+          <div className="flex justify-between text-sm text-preto/70 mb-2">
+            <span>
+              Pergunta {currentQuestionIndex + 1} de {TOTAL_QUESTIONS}
+            </span>
+            <span>Pontuação: {score}</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-3">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${((currentQuestionIndex + 1) / TOTAL_QUESTIONS) * 100}%` }} 
+              className="h-full bg-gradient-to-r from-verde to-roxo rounded-full transition-all"
+            />
+          </div>
+          {/* Informações de precisão */}
+          <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <span>Acertos na sessão: {correctInSession}</span>
+            <span>
+              Precisão: {questionsAnswered > 0 
+                ? Math.round((correctInSession / questionsAnswered) * 100) 
+                : 0}%
+            </span>
+          </div>
         </div>
 
-        {/* Dificuldade e Linguagem */}
-        <div className="mt-8 text-sm text-gray-500 flex justify-center gap-6">
-          <span>Dificuldade: {question.dificuldade}</span>
-          <span>•</span>
-          <span>Linguagem: {question.linguagem?.nome || "Geral"}</span>
-        </div>
+        {/* Question Card */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentQuestionIndex}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ duration: 0.3 }}
+            className="max-w-4xl mx-auto bg-white rounded-3xl shadow-2xl p-8 md:p-12 border-2 border-roxo"
+          >
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-6">
+                <span className="bg-roxo/10 text-roxo px-6 py-2 rounded-full font-bold">
+                  Dificuldade {currentQuestion!.dificuldade}
+                </span>
+                <span className="text-preto/50 text-lg">
+                  Linguagem: {currentQuestion!.linguagem_id === 1 ? "Python" : 
+                             currentQuestion!.linguagem_id === 2 ? "JavaScript" : 
+                             currentQuestion!.linguagem_id === 3 ? "TypeScript" : 
+                             "Geral"}
+                </span>
+              </div>
 
-        {/* Barra de Progresso */}
-        <ProgressBar />
-      </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-preto leading-tight">
+                {currentQuestion!.pergunta}
+              </h2>
+            </div>
 
-      {/* Botão Enviar */}
-      <div className="fixed left-0 right-0 bottom-6 flex justify-center z-30">
-        <button
-          onClick={handleOpenConfirm}
-          disabled={loading || selected === null}
-          className="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-full shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {loading ? "Enviando..." : "ENVIAR RESPOSTA"}
-        </button>
-      </div>
+            {/* Alternatives */}
+            <div className="space-y-4">
+              {alternatives.map((alt) => {
+                const isCorrect = alt.id === currentQuestion!.alt_correta;
+                const isSelected = alt.id === selectedAnswer;
+                const showFeedback = isAnswered;
+
+                let buttonStyle = "bg-white border-2 border-gray-300 hover:border-roxo";
+                if (showFeedback) {
+                  if (isCorrect) {
+                    buttonStyle = "bg-verde/20 border-4 border-verde";
+                  } else if (isSelected && !isCorrect) {
+                    buttonStyle = "bg-red-500/20 border-4 border-red-500";
+                  }
+                }
+
+                return (
+                  <motion.button
+                    key={alt.id}
+                    onClick={() => handleAnswerSelect(alt.id)}
+                    disabled={isAnswered}
+                    whileHover={{ scale: isAnswered ? 1 : 1.02 }}
+                    whileTap={{ scale: isAnswered ? 1 : 0.98 }}
+                    className={`w-full p-6 rounded-2xl text-left font-semibold text-lg md:text-xl transition-all ${buttonStyle} ${
+                      isAnswered ? "cursor-not-allowed" : "cursor-pointer"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-preto">{alt.text}</span>
+                      {showFeedback && isCorrect && (
+                        <FaCheckCircle className="text-3xl text-verde" />
+                      )}
+                      {showFeedback && isSelected && !isCorrect && (
+                        <FaTimesCircle className="text-3xl text-red-500" />
+                      )}
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
+
+            {/* Botão Confirmar */}
+            {!isAnswered && selectedAnswer !== null && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-8 text-center"
+              >
+                <button
+                  onClick={handleOpenConfirm}
+                  disabled={loading}
+                  className="bg-gradient-to-r from-verde to-roxo text-white px-12 py-4 rounded-full font-bold text-xl hover:shadow-xl transform hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Enviando..." : "CONFIRMAR RESPOSTA"}
+                </button>
+              </motion.div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </main>
 
       {/* Modal de confirmação */}
       <ConfirmModal
@@ -318,6 +403,6 @@ export default function PerguntaPage() {
         onConfirm={handleConfirmSend}
         onCancel={() => setConfirmOpen(false)}
       />
-    </main>
+    </div>
   );
 }
