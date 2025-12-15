@@ -48,9 +48,35 @@ export default function ContatoSection() {
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
-          {/* Formulário */}
+          {/* Imagem da Coruja */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="hidden lg:flex items-center justify-center"
+          >
+            <div className="relative">
+              <Image 
+                src="/codelingo.png" 
+                alt="Mascote CodeLingo" 
+                width={400} 
+                height={400}
+                className="drop-shadow-2xl"
+              />
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="absolute top-10 right-0 text-6xl"
+              >
+                📧
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Formulário */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}

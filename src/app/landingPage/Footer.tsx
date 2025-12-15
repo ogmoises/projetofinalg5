@@ -21,7 +21,6 @@ export default function Footer({ scrollToTop }: FooterProps) {
   const resources = [
     { label: "Quiz", href: "/quiz" },
     { label: "Dificuldade", href: "/dificuldade" },
-    { label: "Admin", href: "/admin" },
   ];
 
   return (
