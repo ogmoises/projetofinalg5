@@ -94,22 +94,29 @@ model RespostasDoUsuario {
 }
 
 model Perguntas {
-  id           Int    @id @default(autoincrement())
+  id           Int     @id @default(autoincrement())
   linguagem_id Int
   dificuldade  Int
+  tipo         String  @default("multipla_escolha")  // ← NOVO
+  categoria    String? // ← NOVO
   pergunta     String
-  alternativa  Json   // Array de strings
+  alternativa  Json
   alt_correta  Int
-
+  explicacao   String? // ← NOVO
+  codigo       String? // ← NOVO
+  
   linguagem Linguagem           @relation(fields: [linguagem_id], references: [id])
   respostas RespostasDoUsuario[]
   
   @@index([linguagem_id, dificuldade])
+  @@index([tipo]) // ← NOVO
+  @@index([categoria]) // ← NOVO
 }
 
 model Linguagem {
-    id   Int    @id @default(autoincrement())
-    nome String @unique
-
-    perguntas Perguntas[]
+  id        Int         @id @default(autoincrement())
+  nome      String      @unique
+  perguntas Perguntas[]
+  
+  @@map("linguagem")
 }

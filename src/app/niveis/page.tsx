@@ -11,21 +11,37 @@ import { useRouter } from "next/navigation";
 export default function NiveisPage() {
   const router = useRouter();
   const [userId, setUserId] = useState<number | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
-  // Pega o userId do sessionStorage
+  // CRITICAL: Espera o componente montar antes de acessar sessionStorage
   useEffect(() => {
     const storedUserId = sessionStorage.getItem("userId");
+    console.log("🔍 userId do sessionStorage:", storedUserId);
+    
     if (storedUserId) {
-      setUserId(parseInt(storedUserId));
+      const parsedId = parseInt(storedUserId);
+      console.log("✅ userId parseado:", parsedId);
+      setUserId(parsedId);
+      setIsReady(true);
     } else {
-      // Se não tiver usuário logado, redireciona
+      console.log("❌ Sem userId, redirecionando...");
       router.push("/login");
     }
   }, [router]);
 
-  const { data: stats, isLoading } = api.usuario.getStats.useQuery(
+  // Query SÓ executa quando isReady = true
+  const { data: stats, isLoading, error } = api.usuario.getStats.useQuery(
     { id: userId! },
-    { enabled: !!userId }
+    { 
+      enabled: isReady && userId !== null,
+      retry: 1,
+      onError: (err) => {
+        console.error("❌ Erro na query:", err);
+      },
+      onSuccess: (data) => {
+        console.log("✅ Dados carregados:", data);
+      }
+    }
   );
 
   // Calcular nível baseado na pontuação
@@ -41,18 +57,77 @@ export default function NiveisPage() {
     return { xpAtual, xpNecessario };
   };
 
-  if (isLoading) {
+  // Loading inicial - esperando montar
+  if (!isReady) {
     return (
       <div className="flex flex-col h-screen">
         <SimpleNavbar />
         <div className="flex-1 flex items-center justify-center bg-branco">
-          <div className="text-2xl text-roxo font-bold animate-pulse">Carregando...</div>
+          <div className="text-2xl text-roxo font-bold animate-pulse">
+            Carregando sessão...
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!stats) return null;
+  // Loading dos dados
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-screen">
+        <SimpleNavbar />
+        <div className="flex-1 flex items-center justify-center bg-branco">
+          <div className="text-center">
+            <div className="text-2xl text-roxo font-bold animate-pulse mb-4">
+              Carregando seus dados...
+            </div>
+            <p className="text-preto/70">userId: {userId}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Erro ao carregar
+  if (error || !stats) {
+    console.error("❌ Erro completo:", error);
+    return (
+      <div className="flex flex-col h-screen">
+        <SimpleNavbar />
+        <div className="flex-1 flex items-center justify-center bg-branco">
+          <div className="text-center max-w-md">
+            <div className="text-6xl mb-4">😕</div>
+            <h2 className="text-2xl font-bold text-preto mb-4">
+              Erro ao carregar dados
+            </h2>
+            <p className="text-preto/70 mb-2">
+              Não conseguimos encontrar suas informações.
+            </p>
+            <p className="text-sm text-preto/50 mb-6">
+              userId tentado: {userId}
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  sessionStorage.clear();
+                  router.push("/login");
+                }}
+                className="bg-roxo text-white px-6 py-3 rounded-full font-bold hover:bg-roxo/90 w-full"
+              >
+                Fazer Login Novamente
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="border-2 border-roxo text-roxo px-6 py-3 rounded-full font-bold hover:bg-roxo/5 w-full"
+              >
+                Tentar Novamente
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const nivel = calcularNivel(stats.usuario.pontuacao);
   const { xpAtual, xpNecessario } = calcularXPProximoNivel(stats.usuario.pontuacao);
