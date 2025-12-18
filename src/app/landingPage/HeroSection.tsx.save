@@ -71,9 +71,9 @@ export default function HeroSection() {
             viewport={{ once: true }}
             transition={{ delay: 0.5, duration: 0.6 }}
           >
-            <Image src="/Python.svg" alt="Python" width={60} height={60} unoptimized/>
+            <Image src="/Python.svg" alt="Python" width={60} height={60}/>
             <Image src="/simbolo javascript.png" alt="JavaScript" width={70} height={70} className="-translate-y-6"/>
-            <Image src="/simbolo C++.png" alt="C++" width={40} height={40} unoptimized/>
+            <Image src="/simbolo C++.png" alt="C++" width={40} height={40} />
             <Image src="/simbolo C.png" alt="C#" width={50} height={50} className="-translate-y-6"/>
           </motion.div>
         </div>
