@@ -77,7 +77,7 @@ export default function QuizPage() {
     );
   }
 
-  const alternativas = JSON.parse(questao.alternativa as string);
+  const alternativas = questao.alternativa as string[];
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-branco to-roxo/5">
