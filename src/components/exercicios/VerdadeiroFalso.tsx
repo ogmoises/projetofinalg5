@@ -10,6 +10,7 @@ type Props = {
 export function VerdadeiroFalso({ pergunta, onResponder }: Props) {
   const [selecionado, setSelecionado] = useState<boolean | null>(null);
 
+
   const handleSelect = (valor: boolean) => {
     setSelecionado(valor);
     onResponder(valor);

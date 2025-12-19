@@ -10,6 +10,8 @@ type Props = {
 
 export function CompletarCodigo({ pergunta, codigoComLacuna, alternativas, onResponder }: Props) {
   const [selecionado, setSelecionado] = useState<number | null>(null);
+
+  
   
   const codigoPreenchido = selecionado !== null 
     ? codigoComLacuna.replace("___", alternativas[selecionado])

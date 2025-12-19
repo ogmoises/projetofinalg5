@@ -12,6 +12,7 @@ type Props = {
 export function MultiplaEscolha({ pergunta, alternativas, codigo, onResponder }: Props) {
   const [selecionado, setSelecionado] = useState<number | null>(null);
 
+  
   const handleSelect = (indice: number) => {
     setSelecionado(indice);
     onResponder(indice);

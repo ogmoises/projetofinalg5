@@ -159,42 +159,36 @@ export const perguntasRouter = createTRPCRouter({
 
     // ✅ BUSCAR QUESTÃO ALEATÓRIA (NECESSÁRIA PARA O QUIZ)
     buscarAleatoria: publicProcedure
-        .input(z.object({
-            linguagem_id: z.number(),
-            dificuldade: z.number(),
-        }))
-        .query(async ({ ctx, input }) => {
-            try {
-                const todasQuestoes = await ctx.db.perguntas.findMany({
-                    where: {
-                        linguagem_id: input.linguagem_id,
-                        dificuldade: input.dificuldade,
-                    },
-                    include: {
-                        linguagem: true
-                    }
-                });
-
-                if (todasQuestoes.length === 0) {
-                    throw new TRPCError({
-                        code: "NOT_FOUND",
-                        message: `Nenhuma questão de dificuldade ${input.dificuldade} encontrada para esta linguagem`
-                    });
+    .input(z.object({
+        linguagem_id: z.number(),
+        dificuldade: z.number(),
+    }))
+    .query(async ({ ctx, input }) => {
+        try {
+            const todasQuestoes = await ctx.db.perguntas.findMany({
+                where: {
+                    linguagem_id: input.linguagem_id,
+                    dificuldade: input.dificuldade,
+                },
+                include: {
+                    linguagem: true
                 }
+            });
 
-                // Seleciona uma aleatória
-                const indiceAleatorio = Math.floor(Math.random() * todasQuestoes.length);
-                return todasQuestoes[indiceAleatorio];
-            } catch (error) {
-                if (error instanceof TRPCError) throw error;
-                
-                console.error("Erro ao buscar questão:", error);
-                throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "Erro ao buscar questão"
-                });
+            if (todasQuestoes.length === 0) {
+                // ✅ RETORNA NULL ao invés de lançar erro
+                return null;
             }
-        }),
+
+            // Seleciona uma questão aleatória
+            const indiceAleatorio = Math.floor(Math.random() * todasQuestoes.length);
+            return todasQuestoes[indiceAleatorio];
+            
+        } catch (error) {
+            console.error("Erro ao buscar questão:", error);
+            return null;
+        }
+    }),
 
     // ✅ BUSCAR QUESTÕES FILTRADAS
     buscar: publicProcedure
