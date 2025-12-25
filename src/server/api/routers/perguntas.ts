@@ -157,38 +157,46 @@ export const perguntasRouter = createTRPCRouter({
 
     // ===== NOVAS ROTAS ADICIONADAS =====
 
-    // ✅ BUSCAR QUESTÃO ALEATÓRIA (NECESSÁRIA PARA O QUIZ)
+    // ✅ BUSCAR QUESTÃO ALEATÓRIA (CORRIGIDA - NÃO REPETE QUESTÕES)
     buscarAleatoria: publicProcedure
-    .input(z.object({
-        linguagem_id: z.number(),
-        dificuldade: z.number(),
-    }))
-    .query(async ({ ctx, input }) => {
-        try {
-            const todasQuestoes = await ctx.db.perguntas.findMany({
-                where: {
-                    linguagem_id: input.linguagem_id,
-                    dificuldade: input.dificuldade,
-                },
-                include: {
-                    linguagem: true
-                }
-            });
+        .input(z.object({
+            linguagem_id: z.number(),
+            dificuldade: z.number(),
+            usuario_id: z.number().optional(),
+            questoesRespondidas: z.array(z.number()).optional(),
+        }))
+        .query(async ({ ctx, input }) => {
+            try {
+                const todasQuestoes = await ctx.db.perguntas.findMany({
+                    where: {
+                        linguagem_id: input.linguagem_id,
+                        dificuldade: input.dificuldade,
+                        // ✅ EXCLUI questões já respondidas
+                        ...(input.questoesRespondidas && input.questoesRespondidas.length > 0 && {
+                            id: {
+                                notIn: input.questoesRespondidas
+                            }
+                        })
+                    },
+                    include: {
+                        linguagem: true
+                    }
+                });
 
-            if (todasQuestoes.length === 0) {
-                // ✅ RETORNA NULL ao invés de lançar erro
+                if (todasQuestoes.length === 0) {
+                    // Se não há mais questões novas, retorna null
+                    return null;
+                }
+
+                // Seleciona uma questão aleatória
+                const indiceAleatorio = Math.floor(Math.random() * todasQuestoes.length);
+                return todasQuestoes[indiceAleatorio];
+                
+            } catch (error) {
+                console.error("Erro ao buscar questão:", error);
                 return null;
             }
-
-            // Seleciona uma questão aleatória
-            const indiceAleatorio = Math.floor(Math.random() * todasQuestoes.length);
-            return todasQuestoes[indiceAleatorio];
-            
-        } catch (error) {
-            console.error("Erro ao buscar questão:", error);
-            return null;
-        }
-    }),
+        }),
 
     // ✅ BUSCAR QUESTÕES FILTRADAS
     buscar: publicProcedure

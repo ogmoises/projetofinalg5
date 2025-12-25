@@ -5,6 +5,8 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  reactStrictMode: false,  // ← ADICIONE ESTA LINHA
+};
 
 export default config;

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type Props = {
   pergunta: string;
@@ -11,8 +11,11 @@ type Props = {
 export function CompletarCodigo({ pergunta, codigoComLacuna, alternativas, onResponder }: Props) {
   const [selecionado, setSelecionado] = useState<number | null>(null);
 
-  
-  
+  // ✅ CORREÇÃO: Reset quando pergunta muda
+  useEffect(() => {
+    setSelecionado(null);
+  }, [pergunta]);
+
   const codigoPreenchido = selecionado !== null 
     ? codigoComLacuna.replace("___", alternativas[selecionado])
     : codigoComLacuna;
@@ -25,11 +28,9 @@ export function CompletarCodigo({ pergunta, codigoComLacuna, alternativas, onRes
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-preto">{pergunta}</h2>
-
       <div className="bg-gray-900 text-green-400 p-4 rounded-xl">
         <pre><code>{codigoPreenchido}</code></pre>
       </div>
-
       <div className="grid grid-cols-2 gap-3">
         {alternativas.map((alt, index) => (
           <button

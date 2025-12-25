@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 type Props = {
@@ -12,7 +12,11 @@ type Props = {
 export function MultiplaEscolha({ pergunta, alternativas, codigo, onResponder }: Props) {
   const [selecionado, setSelecionado] = useState<number | null>(null);
 
-  
+  // ✅ CORREÇÃO: Reset quando pergunta muda
+  useEffect(() => {
+    setSelecionado(null);
+  }, [pergunta]);
+
   const handleSelect = (indice: number) => {
     setSelecionado(indice);
     onResponder(indice);
@@ -21,13 +25,11 @@ export function MultiplaEscolha({ pergunta, alternativas, codigo, onResponder }:
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-preto">{pergunta}</h2>
-      
       {codigo && (
         <pre className="bg-gray-900 text-green-400 p-4 rounded-xl overflow-x-auto">
           <code>{codigo}</code>
         </pre>
       )}
-
       <div className="space-y-3">
         {alternativas.map((alt, index) => (
           <motion.button

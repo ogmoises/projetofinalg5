@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type Props = {
   pergunta: string;
@@ -11,7 +11,10 @@ type Props = {
 export function EncontrarErro({ pergunta, codigo, alternativas, onResponder }: Props) {
   const [selecionado, setSelecionado] = useState<number | null>(null);
 
-  
+  // ✅ CORREÇÃO: Reset quando pergunta muda
+  useEffect(() => {
+    setSelecionado(null);
+  }, [pergunta]);
   
   // Proteção: se codigo estiver vazio, usa a pergunta
   const codigoParaMostrar = codigo || pergunta;
@@ -39,7 +42,6 @@ export function EncontrarErro({ pergunta, codigo, alternativas, onResponder }: P
           ))}
         </pre>
       </div>
-
       <div className="space-y-3">
         {alternativas.map((alt, index) => (
           <button

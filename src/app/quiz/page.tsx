@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 import SimpleNavbar from "@/components/ui/SimpleNavbar";
@@ -16,10 +16,13 @@ export default function QuizPage() {
   const [respostaSelecionada, setRespostaSelecionada] = useState<number | null>(null);
   const [mostrarResultado, setMostrarResultado] = useState(false);
   const [questoesRespondidas, setQuestoesRespondidas] = useState<number[]>([]);
+  const [emTransicao, setEmTransicao] = useState(false);
   const [questaoAtual, setQuestaoAtual] = useState(0);
   const [acertos, setAcertos] = useState(0);
   const [quizFinalizado, setQuizFinalizado] = useState(false);
   const TOTAL_QUESTOES = 10;
+  
+  const buscandoQuestao = useRef(false);
 
   // Carregar dados do sessionStorage
   useEffect(() => {
@@ -35,6 +38,8 @@ export default function QuizPage() {
     setDificuldade(diff ? parseInt(diff) : 1);
   }, [router]);
 
+  // Limpa estado ao iniciar novo quiz - apagado ( bug do refetch duplo)
+  
   // Reset ao mudar de questão
   useEffect(() => {
     setRespostaSelecionada(null);
@@ -45,10 +50,11 @@ export default function QuizPage() {
   const { data: questao, isLoading, refetch } = api.perguntas.buscarAleatoria.useQuery(
     { 
       linguagem_id: linguagemId || 0, 
-      dificuldade 
+      dificuldade,
+      questoesRespondidas: questoesRespondidas
     },
     { 
-      enabled: linguagemId !== null && !quizFinalizado,
+      enabled: linguagemId !== null && !quizFinalizado && !emTransicao,
       retry: false
     }
   );
@@ -82,7 +88,11 @@ export default function QuizPage() {
       setAcertos(prev => prev + 1);
     }
     
-    setQuestoesRespondidas(prev => [...prev, questao.id]);
+    setQuestoesRespondidas(prev => {
+      const novoArray = [...prev, questao.id];
+      console.log("📋 QUESTÕES RESPONDIDAS:", novoArray);
+      return novoArray;
+    });
     setMostrarResultado(true);
   };
 
@@ -92,14 +102,20 @@ export default function QuizPage() {
       return;
     }
     
-    // Limpa estado e avança
-    setRespostaSelecionada(null);
-    setMostrarResultado(false);
-    setQuestaoAtual(prev => prev + 1);
+    // Previne múltiplas buscas simultâneas
+    if (buscandoQuestao.current) return;
+    buscandoQuestao.current = true;
     
-    // Refetch da próxima questão
+    setEmTransicao(true);
+    setMostrarResultado(false);
+    setRespostaSelecionada(null);
+    
     setTimeout(() => {
-      refetch();
+      setQuestaoAtual(prev => prev + 1);
+      refetch().finally(() => {
+        setEmTransicao(false);
+        buscandoQuestao.current = false;
+      });
     }, 100);
   };
 
@@ -110,6 +126,8 @@ export default function QuizPage() {
     setQuizFinalizado(false);
     setRespostaSelecionada(null);
     setMostrarResultado(false);
+    setEmTransicao(false);
+    buscandoQuestao.current = false;
     refetch();
   };
 
@@ -137,7 +155,7 @@ export default function QuizPage() {
   }
 
   // Sem questões disponíveis
-  if (!questao && !isLoading) {
+  if (!questao && !isLoading && !emTransicao) {
     return (
       <div className="flex flex-col h-screen">
         <SimpleNavbar />
@@ -274,111 +292,114 @@ export default function QuizPage() {
             </div>
           </div>
 
+          {/* Loading durante transição */}
+          {emTransicao && (
+            <div className="bg-white rounded-3xl shadow-2xl p-8 border-2 border-roxo flex items-center justify-center min-h-[400px]">
+              <div className="text-2xl text-roxo font-bold animate-pulse">Carregando próxima questão...</div>
+            </div>
+          )}
+
           {/* Card da Questão */}
-          <motion.div
-            key={`${questaoAtual}-${questao?.id}`}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-white rounded-3xl shadow-2xl p-8 border-2 border-roxo"
-          >
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-              <span className="bg-roxo/10 text-roxo px-4 py-2 rounded-full font-bold text-sm">
-                {questao?.categoria || "Geral"}
-              </span>
-              <span className="bg-verde/10 text-verde px-4 py-2 rounded-full font-bold text-sm">
-                {dificuldade === 1 ? "Fácil" : dificuldade === 2 ? "Médio" : "Difícil"}
-              </span>
-            </div>
+          {!emTransicao && questao && (
+            <motion.div
+              key={`questao-${questaoAtual}-${questao.id}`}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="bg-white rounded-3xl shadow-2xl p-8 border-2 border-roxo"
+            >
+              {/* Header */}
+              <div className="flex justify-between items-center mb-6">
+                <span className="bg-roxo/10 text-roxo px-4 py-2 rounded-full font-bold text-sm">
+                  {questao?.categoria || "Geral"}
+                </span>
+                <span className="bg-verde/10 text-verde px-4 py-2 rounded-full font-bold text-sm">
+                  {dificuldade === 1 ? "Fácil" : dificuldade === 2 ? "Médio" : "Difícil"}
+                </span>
+              </div>
 
-            {/* Componente dinâmico baseado no tipo */}
-            {(questao?.tipo === "multipla_escolha" || questao?.tipo === "output_codigo") && (
-              <MultiplaEscolha
-                key={`${questaoAtual}-${questao.id}`}
-                pergunta={questao.pergunta}
-                codigo={questao.codigo}
-                alternativas={alternativas}
-                onResponder={handleResponder}
-              />
-            )}
-
-            {questao?.tipo === "completar_codigo" && (
-              <CompletarCodigo
-                key={`${questaoAtual}-${questao.id}`}
-                pergunta={questao.pergunta}
-                codigoComLacuna={questao.codigo || questao.pergunta}
-                alternativas={alternativas}
-                onResponder={handleResponder}
-              />
-            )}
-
-            {questao?.tipo === "encontrar_erro" && (
-              <EncontrarErro
-                key={`${questaoAtual}-${questao.id}`}
-                pergunta={questao.pergunta}
-                codigo={questao.codigo || questao.pergunta}
-                alternativas={alternativas}
-                onResponder={handleResponder}
-              />
-            )}
-
-            {questao?.tipo === "verdadeiro_falso" && (
-              <VerdadeiroFalso
-                key={`${questaoAtual}-${questao.id}`}
-                pergunta={questao.pergunta}
-                onResponder={(valor) => handleResponder(valor ? 0 : 1)}
-              />
-            )}
-
-            {/* Resultado */}
-            {mostrarResultado && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`mt-6 p-6 rounded-2xl ${
-                  respostaSelecionada === questao?.alt_correta
-                    ? "bg-verde/10 border-2 border-verde"
-                    : "bg-red-500/10 border-2 border-red-500"
-                }`}
-              >
-                <p className="text-2xl font-bold mb-4">
-                  {respostaSelecionada === questao?.alt_correta ? "🎉 Correto!" : "❌ Incorreto"}
-                </p>
-
-                {questao?.explicacao && (
-                  <p className="text-preto/80 mb-4">{questao.explicacao}</p>
-                )}
-
-                {respostaSelecionada !== questao?.alt_correta && (
-                  <div className="bg-white/50 rounded-xl p-4 mt-4">
-                    <p className="font-semibold text-verde">
-                      Resposta correta: {alternativas[questao?.alt_correta || 0]}
-                    </p>
-                  </div>
-                )}
-              </motion.div>
-            )}
-
-            {/* Botões */}
-            <div className="mt-8 text-center">
-              {!mostrarResultado ? (
-                <button
-                  onClick={handleConfirmar}
-                  disabled={respostaSelecionada === null}
-                  className="bg-gradient-to-r from-verde to-roxo text-white px-12 py-4 rounded-full font-bold text-xl hover:shadow-xl transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Confirmar Resposta
-                </button>
-              ) : (
-                <button
-                  onClick={handleProxima}
-                  className="bg-gradient-to-r from-verde to-roxo text-white px-12 py-4 rounded-full font-bold text-xl hover:shadow-xl transform hover:scale-105 transition-all"
-                >
-                  {questaoAtual + 1 >= TOTAL_QUESTOES ? 'Ver Resultado Final 🎯' : 'Próxima Questão →'}
-                </button>
+              {/* Componente dinâmico baseado no tipo */}
+              {(questao?.tipo === "multipla_escolha" || questao?.tipo === "output_codigo") && (
+                <MultiplaEscolha
+                  pergunta={questao.pergunta}
+                  codigo={questao.codigo}
+                  alternativas={alternativas}
+                  onResponder={handleResponder}
+                />
               )}
-            </div>
-          </motion.div>
+
+              {questao?.tipo === "completar_codigo" && (
+                <CompletarCodigo
+                  pergunta={questao.pergunta}
+                  codigoComLacuna={questao.codigo || questao.pergunta}
+                  alternativas={alternativas}
+                  onResponder={handleResponder}
+                />
+              )}
+
+              {questao?.tipo === "encontrar_erro" && (
+                <EncontrarErro
+                  pergunta={questao.pergunta}
+                  codigo={questao.codigo || questao.pergunta}
+                  alternativas={alternativas}
+                  onResponder={handleResponder}
+                />
+              )}
+
+              {questao?.tipo === "verdadeiro_falso" && (
+                <VerdadeiroFalso
+                  pergunta={questao.pergunta}
+                  onResponder={(valor) => handleResponder(valor ? 0 : 1)}
+                />
+              )}
+
+              {/* Resultado */}
+              {mostrarResultado && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`mt-6 p-6 rounded-2xl ${
+                    respostaSelecionada === questao?.alt_correta
+                      ? "bg-verde/10 border-2 border-verde"
+                      : "bg-red-500/10 border-2 border-red-500"
+                  }`}
+                >
+                  <p className="text-2xl font-bold mb-4">
+                    {respostaSelecionada === questao?.alt_correta ? "🎉 Correto!" : "❌ Incorreto"}
+                  </p>
+                  {questao?.explicacao && (
+                    <p className="text-preto/80 mb-4">{questao.explicacao}</p>
+                  )}
+                  {respostaSelecionada !== questao?.alt_correta && (
+                    <div className="bg-white/50 rounded-xl p-4 mt-4">
+                      <p className="font-semibold text-verde">
+                        Resposta correta: {alternativas[questao?.alt_correta || 0]}
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* Botões */}
+              <div className="mt-8 text-center">
+                {!mostrarResultado ? (
+                  <button
+                    onClick={handleConfirmar}
+                    disabled={respostaSelecionada === null}
+                    className="bg-gradient-to-r from-verde to-roxo text-white px-12 py-4 rounded-full font-bold text-xl hover:shadow-xl transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Confirmar Resposta
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleProxima}
+                    className="bg-gradient-to-r from-verde to-roxo text-white px-12 py-4 rounded-full font-bold text-xl hover:shadow-xl transform hover:scale-105 transition-all"
+                  >
+                    {questaoAtual + 1 >= TOTAL_QUESTOES ? 'Ver Resultado Final 🎯' : 'Próxima Questão →'}
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          )}
         </div>
       </main>
     </div>

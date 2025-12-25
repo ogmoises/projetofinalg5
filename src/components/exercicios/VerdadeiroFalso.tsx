@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaCheck, FaTimes } from "react-icons/fa";
 
 type Props = {
@@ -10,6 +10,10 @@ type Props = {
 export function VerdadeiroFalso({ pergunta, onResponder }: Props) {
   const [selecionado, setSelecionado] = useState<boolean | null>(null);
 
+  // ✅ CORREÇÃO: Reset quando pergunta muda
+  useEffect(() => {
+    setSelecionado(null);
+  }, [pergunta]);
 
   const handleSelect = (valor: boolean) => {
     setSelecionado(valor);
@@ -19,7 +23,6 @@ export function VerdadeiroFalso({ pergunta, onResponder }: Props) {
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-bold text-preto text-center">{pergunta}</h2>
-
       <div className="grid grid-cols-2 gap-6">
         <button
           onClick={() => handleSelect(true)}
@@ -32,7 +35,6 @@ export function VerdadeiroFalso({ pergunta, onResponder }: Props) {
           <FaCheck className="text-6xl text-green-500 mx-auto mb-3" />
           <p className="text-2xl font-bold">Verdadeiro</p>
         </button>
-
         <button
           onClick={() => handleSelect(false)}
           className={`p-8 rounded-2xl border-4 transition-all ${
