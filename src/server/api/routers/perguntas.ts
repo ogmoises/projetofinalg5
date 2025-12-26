@@ -163,37 +163,57 @@ export const perguntasRouter = createTRPCRouter({
             linguagem_id: z.number(),
             dificuldade: z.number(),
             usuario_id: z.number().optional(),
-            questoesRespondidas: z.array(z.number()).optional(),
+            questoesRespondidas: z.array(z.number()).optional().default([]),
         }))
         .query(async ({ ctx, input }) => {
             try {
+                console.log("🔍 BUSCANDO QUESTÃO:", {
+                    linguagem_id: input.linguagem_id,
+                    dificuldade: input.dificuldade,
+                    questoesRespondidas: input.questoesRespondidas,
+                    totalExcluidas: input.questoesRespondidas?.length || 0
+                });
+
+                // Construir o where dinamicamente
+                const whereCondition: any = {
+                    linguagem_id: input.linguagem_id,
+                    dificuldade: input.dificuldade,
+                };
+
+                // ✅ CORREÇÃO: Adicionar notIn apenas se houver questões respondidas
+                if (input.questoesRespondidas && input.questoesRespondidas.length > 0) {
+                    whereCondition.id = {
+                        notIn: input.questoesRespondidas
+                    };
+                }
+
                 const todasQuestoes = await ctx.db.perguntas.findMany({
-                    where: {
-                        linguagem_id: input.linguagem_id,
-                        dificuldade: input.dificuldade,
-                        // ✅ EXCLUI questões já respondidas
-                        ...(input.questoesRespondidas && input.questoesRespondidas.length > 0 && {
-                            id: {
-                                notIn: input.questoesRespondidas
-                            }
-                        })
-                    },
+                    where: whereCondition,
                     include: {
                         linguagem: true
                     }
                 });
 
+                console.log("📊 QUESTÕES ENCONTRADAS:", todasQuestoes.length);
+
                 if (todasQuestoes.length === 0) {
-                    // Se não há mais questões novas, retorna null
+                    console.log("❌ Nenhuma questão disponível");
                     return null;
                 }
 
                 // Seleciona uma questão aleatória
                 const indiceAleatorio = Math.floor(Math.random() * todasQuestoes.length);
-                return todasQuestoes[indiceAleatorio];
+                const questaoSelecionada = todasQuestoes[indiceAleatorio];
+
+                console.log("✅ QUESTÃO SELECIONADA:", {
+                    id: questaoSelecionada?.id,
+                    pergunta: questaoSelecionada?.pergunta.substring(0, 50) + "..."
+                });
+
+                return questaoSelecionada;
                 
             } catch (error) {
-                console.error("Erro ao buscar questão:", error);
+                console.error("❌ ERRO ao buscar questão:", error);
                 return null;
             }
         }),

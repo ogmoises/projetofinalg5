@@ -20,9 +20,10 @@ export default function QuizPage() {
   const [questaoAtual, setQuestaoAtual] = useState(0);
   const [acertos, setAcertos] = useState(0);
   const [quizFinalizado, setQuizFinalizado] = useState(false);
-  const TOTAL_QUESTOES = 10;
   
-  const buscandoQuestao = useRef(false);
+  // ✅ SOLUÇÃO: Guardar a questão atual em um ref para não perder durante transições
+  const [questaoExibida, setQuestaoExibida] = useState<any>(null);
+  const TOTAL_QUESTOES = 10;
 
   // Carregar dados do sessionStorage
   useEffect(() => {
@@ -38,15 +39,7 @@ export default function QuizPage() {
     setDificuldade(diff ? parseInt(diff) : 1);
   }, [router]);
 
-  // Limpa estado ao iniciar novo quiz - apagado ( bug do refetch duplo)
-  
-  // Reset ao mudar de questão
-  useEffect(() => {
-    setRespostaSelecionada(null);
-    setMostrarResultado(false);
-  }, [questaoAtual]);
-
-  // Query da questão
+  // Query da questão - só busca quando NÃO está mostrando resultado
   const { data: questao, isLoading, refetch } = api.perguntas.buscarAleatoria.useQuery(
     { 
       linguagem_id: linguagemId || 0, 
@@ -54,10 +47,32 @@ export default function QuizPage() {
       questoesRespondidas: questoesRespondidas
     },
     { 
-      enabled: linguagemId !== null && !quizFinalizado && !emTransicao,
-      retry: false
+      enabled: linguagemId !== null && !quizFinalizado && !mostrarResultado && !emTransicao,
+      retry: false,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
     }
   );
+
+  // ✅ Quando receber uma nova questão válida, salvar ela
+  useEffect(() => {
+    if (questao && !mostrarResultado) {
+      console.log("📦 SALVANDO QUESTÃO:", questao.id);
+      setQuestaoExibida(questao);
+    }
+  }, [questao, mostrarResultado]);
+
+  // 🔍 DEBUG: Log toda vez que a questão mudar
+  useEffect(() => {
+    console.log("🔍 ESTADO:", {
+      questao: questao?.id,
+      questaoExibida: questaoExibida?.id,
+      isLoading,
+      questaoAtual,
+      mostrarResultado,
+      questoesRespondidas
+    });
+  }, [questao, questaoExibida, isLoading, questaoAtual, mostrarResultado, questoesRespondidas]);
 
   const registrarResposta = api.usuario.registrarResposta.useMutation();
 
@@ -66,16 +81,16 @@ export default function QuizPage() {
   };
 
   const handleConfirmar = async () => {
-    if (respostaSelecionada === null || !questao) return;
+    if (respostaSelecionada === null || !questaoExibida) return;
 
-    const acertou = respostaSelecionada === questao.alt_correta;
+    const acertou = respostaSelecionada === questaoExibida.alt_correta;
 
     const userId = sessionStorage.getItem("userId");
     if (userId) {
       try {
         await registrarResposta.mutateAsync({
           usuario_id: parseInt(userId),
-          perguntas_id: questao.id,
+          perguntas_id: questaoExibida.id,
           alt_selecionado: respostaSelecionada,
           acertou,
         });
@@ -88,35 +103,36 @@ export default function QuizPage() {
       setAcertos(prev => prev + 1);
     }
     
+    // Adicionar questão respondida
     setQuestoesRespondidas(prev => {
-      const novoArray = [...prev, questao.id];
+      const novoArray = [...prev, questaoExibida.id];
       console.log("📋 QUESTÕES RESPONDIDAS:", novoArray);
       return novoArray;
     });
+    
     setMostrarResultado(true);
   };
 
-  const handleProxima = () => {
+  const handleProxima = async () => {
     if (questaoAtual + 1 >= TOTAL_QUESTOES) {
       setQuizFinalizado(true);
       return;
     }
     
-    // Previne múltiplas buscas simultâneas
-    if (buscandoQuestao.current) return;
-    buscandoQuestao.current = true;
+    console.log("⏭️ INDO PARA PRÓXIMA QUESTÃO");
     
-    setEmTransicao(true);
-    setMostrarResultado(false);
+    // Resetar estados
     setRespostaSelecionada(null);
+    setMostrarResultado(false);
+    setEmTransicao(true);
     
+    // Incrementar contador
+    setQuestaoAtual(prev => prev + 1);
+    
+    // Aguardar a query buscar automaticamente
     setTimeout(() => {
-      setQuestaoAtual(prev => prev + 1);
-      refetch().finally(() => {
-        setEmTransicao(false);
-        buscandoQuestao.current = false;
-      });
-    }, 100);
+      setEmTransicao(false);
+    }, 300);
   };
 
   const handleReiniciar = () => {
@@ -127,8 +143,7 @@ export default function QuizPage() {
     setRespostaSelecionada(null);
     setMostrarResultado(false);
     setEmTransicao(false);
-    buscandoQuestao.current = false;
-    refetch();
+    setQuestaoExibida(null);
   };
 
   const handleVoltarNiveis = () => {
@@ -136,7 +151,7 @@ export default function QuizPage() {
   };
 
   // Loading inicial
-  if (linguagemId === null || isLoading) {
+  if (linguagemId === null) {
     return (
       <div className="flex flex-col h-screen">
         <SimpleNavbar />
@@ -146,7 +161,7 @@ export default function QuizPage() {
               Carregando questão...
             </div>
             <div className="text-preto/60">
-              {linguagemId === null ? "Verificando linguagem selecionada..." : "Buscando questões..."}
+              Verificando linguagem selecionada...
             </div>
           </div>
         </div>
@@ -154,8 +169,10 @@ export default function QuizPage() {
     );
   }
 
-  // Sem questões disponíveis
-  if (!questao && !isLoading && !emTransicao) {
+  // Sem questões disponíveis - só mostra se realmente não tem questões E não está em transição
+  if (!questaoExibida && !isLoading && !emTransicao && !quizFinalizado) {
+    console.log("❌ SEM QUESTÕES DISPONÍVEIS");
+    
     return (
       <div className="flex flex-col h-screen">
         <SimpleNavbar />
@@ -251,21 +268,37 @@ export default function QuizPage() {
     );
   }
 
+  // Loading durante transição ou busca inicial
+  if ((isLoading && !questaoExibida) || emTransicao) {
+    return (
+      <div className="flex flex-col h-screen">
+        <SimpleNavbar />
+        <div className="flex-1 flex items-center justify-center bg-branco">
+          <div className="text-center">
+            <div className="text-2xl text-roxo font-bold animate-pulse mb-4">
+              {emTransicao ? "Carregando próxima questão..." : "Carregando questão..."}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Parse das alternativas
   let alternativas: string[] = [];
   
   try {
-    if (typeof questao?.alternativa === 'string') {
-      alternativas = JSON.parse(questao.alternativa);
+    if (typeof questaoExibida?.alternativa === 'string') {
+      alternativas = JSON.parse(questaoExibida.alternativa);
     } 
-    else if (Array.isArray(questao?.alternativa)) {
-      alternativas = questao.alternativa as string[];
+    else if (Array.isArray(questaoExibida?.alternativa)) {
+      alternativas = questaoExibida.alternativa as string[];
     }
     else {
-      alternativas = questao?.alternativa as any as string[];
+      alternativas = questaoExibida?.alternativa as any as string[];
     }
   } catch (error) {
-    console.error("Erro ao processar alternativas:", error);
+    console.error("❌ ERRO ao processar alternativas:", error);
     alternativas = ["Erro ao carregar alternativas"];
   }
 
@@ -292,17 +325,10 @@ export default function QuizPage() {
             </div>
           </div>
 
-          {/* Loading durante transição */}
-          {emTransicao && (
-            <div className="bg-white rounded-3xl shadow-2xl p-8 border-2 border-roxo flex items-center justify-center min-h-[400px]">
-              <div className="text-2xl text-roxo font-bold animate-pulse">Carregando próxima questão...</div>
-            </div>
-          )}
-
           {/* Card da Questão */}
-          {!emTransicao && questao && (
+          {questaoExibida && (
             <motion.div
-              key={`questao-${questaoAtual}-${questao.id}`}
+              key={`questao-${questaoAtual}-${questaoExibida.id}`}
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               className="bg-white rounded-3xl shadow-2xl p-8 border-2 border-roxo"
@@ -310,7 +336,7 @@ export default function QuizPage() {
               {/* Header */}
               <div className="flex justify-between items-center mb-6">
                 <span className="bg-roxo/10 text-roxo px-4 py-2 rounded-full font-bold text-sm">
-                  {questao?.categoria || "Geral"}
+                  {questaoExibida?.categoria || "Geral"}
                 </span>
                 <span className="bg-verde/10 text-verde px-4 py-2 rounded-full font-bold text-sm">
                   {dificuldade === 1 ? "Fácil" : dificuldade === 2 ? "Médio" : "Difícil"}
@@ -318,36 +344,36 @@ export default function QuizPage() {
               </div>
 
               {/* Componente dinâmico baseado no tipo */}
-              {(questao?.tipo === "multipla_escolha" || questao?.tipo === "output_codigo") && (
+              {(questaoExibida?.tipo === "multipla_escolha" || questaoExibida?.tipo === "output_codigo") && (
                 <MultiplaEscolha
-                  pergunta={questao.pergunta}
-                  codigo={questao.codigo}
+                  pergunta={questaoExibida.pergunta}
+                  codigo={questaoExibida.codigo}
                   alternativas={alternativas}
                   onResponder={handleResponder}
                 />
               )}
 
-              {questao?.tipo === "completar_codigo" && (
+              {questaoExibida?.tipo === "completar_codigo" && (
                 <CompletarCodigo
-                  pergunta={questao.pergunta}
-                  codigoComLacuna={questao.codigo || questao.pergunta}
+                  pergunta={questaoExibida.pergunta}
+                  codigoComLacuna={questaoExibida.codigo || questaoExibida.pergunta}
                   alternativas={alternativas}
                   onResponder={handleResponder}
                 />
               )}
 
-              {questao?.tipo === "encontrar_erro" && (
+              {questaoExibida?.tipo === "encontrar_erro" && (
                 <EncontrarErro
-                  pergunta={questao.pergunta}
-                  codigo={questao.codigo || questao.pergunta}
+                  pergunta={questaoExibida.pergunta}
+                  codigo={questaoExibida.codigo || questaoExibida.pergunta}
                   alternativas={alternativas}
                   onResponder={handleResponder}
                 />
               )}
 
-              {questao?.tipo === "verdadeiro_falso" && (
+              {questaoExibida?.tipo === "verdadeiro_falso" && (
                 <VerdadeiroFalso
-                  pergunta={questao.pergunta}
+                  pergunta={questaoExibida.pergunta}
                   onResponder={(valor) => handleResponder(valor ? 0 : 1)}
                 />
               )}
@@ -358,21 +384,21 @@ export default function QuizPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   className={`mt-6 p-6 rounded-2xl ${
-                    respostaSelecionada === questao?.alt_correta
+                    respostaSelecionada === questaoExibida?.alt_correta
                       ? "bg-verde/10 border-2 border-verde"
                       : "bg-red-500/10 border-2 border-red-500"
                   }`}
                 >
                   <p className="text-2xl font-bold mb-4">
-                    {respostaSelecionada === questao?.alt_correta ? "🎉 Correto!" : "❌ Incorreto"}
+                    {respostaSelecionada === questaoExibida?.alt_correta ? "🎉 Correto!" : "❌ Incorreto"}
                   </p>
-                  {questao?.explicacao && (
-                    <p className="text-preto/80 mb-4">{questao.explicacao}</p>
+                  {questaoExibida?.explicacao && (
+                    <p className="text-preto/80 mb-4">{questaoExibida.explicacao}</p>
                   )}
-                  {respostaSelecionada !== questao?.alt_correta && (
+                  {respostaSelecionada !== questaoExibida?.alt_correta && (
                     <div className="bg-white/50 rounded-xl p-4 mt-4">
                       <p className="font-semibold text-verde">
-                        Resposta correta: {alternativas[questao?.alt_correta || 0]}
+                        Resposta correta: {alternativas[questaoExibida?.alt_correta || 0]}
                       </p>
                     </div>
                   )}
