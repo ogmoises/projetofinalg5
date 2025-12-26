@@ -140,6 +140,9 @@ async function main() {
       explicacao: 'Colchetes [] criam uma lista vazia.'
     },
 
+
+
+
     // === NÍVEL 2 - MÉDIO ===
     {
       linguagem_id: pythonId,
@@ -333,6 +336,73 @@ async function main() {
       alt_correta: 0,
       explicacao: 'JavaScript converte o número para string e concatena.'
     },
+    
+  {
+    linguagem_id: jsId,
+    dificuldade: 1,
+    tipo: 'multipla_escolha',
+    categoria: 'Geral',
+    pergunta: 'Como declarar uma variável em JavaScript?',
+    alternativa: JSON.stringify([
+      'var x = 5',
+      'int x = 5',
+      'x := 5',
+      'define x = 5'
+    ]),
+    alt_correta: 0,
+    explicacao: 'Usamos var, let ou const para declarar variáveis.'
+  },
+{
+ linguagem_id: jsId,
+  dificuldade: 1,
+  tipo: 'multipla_escolha',
+  categoria: 'Arrays',
+  pergunta: 'Como acessar o primeiro elemento de um array?',
+  alternativa: JSON.stringify([
+    'arr[0]',
+    'arr[1]',
+    'arr.first()',
+    'arr.get(0)'
+  ]),
+  alt_correta: 0,
+  explicacao: 'Arrays em JavaScript começam no índice 0.'
+},
+{
+  linguagem_id: jsId,
+  dificuldade: 1,
+  tipo: 'output_codigo',
+  categoria: 'Operadores',
+  pergunta: 'Qual o resultado?',
+  codigo: 'console.log(10 % 3)',
+  alternativa: JSON.stringify(['1', '3', '10', '0']),
+  alt_correta: 0,
+  explicacao: 'O operador % retorna o resto da divisão (10 ÷ 3 = 3 resto 1).'
+},
+{
+  linguagem_id: jsId,
+  dificuldade: 1,
+  tipo: 'verdadeiro_falso',
+  categoria: 'Tipos',
+  pergunta: 'null é um tipo de objeto em JavaScript?',
+  alternativa: JSON.stringify(['Verdadeiro', 'Falso']),
+  alt_correta: 0,
+  explicacao: 'typeof null retorna "object" (é um bug histórico do JS).'
+},
+{
+  linguagem_id: jsId,
+  dificuldade: 1,
+  tipo: 'multipla_escolha',
+  categoria: 'Loops',
+  pergunta: 'Qual estrutura repete código um número específico de vezes?',
+  alternativa: JSON.stringify([
+    'for',
+    'if',
+    'switch',
+    'function'
+  ]),
+  alt_correta: 0,
+  explicacao: 'O loop for é ideal para iterações com contador.'
+},
 
     // === NÍVEL 2 - MÉDIO ===
     {
