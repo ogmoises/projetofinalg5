@@ -84,7 +84,10 @@ export const createTRPCRouter = t.router;
  * You can remove this if you don't like it, but it can help catch unwanted waterfalls by simulating
  * network latency that would occur in production but not in local development.
  */
-const timingMiddleware = t.middleware(async ({ next, path }) => {
+/**
+ * Middleware for timing procedure execution and adding an artificial delay in development.
+ */
+const timingMiddleware = t.middleware(async ({ next, path, type }) => {
   const start = Date.now();
 
   if (t._config.isDev) {
@@ -94,9 +97,35 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   }
 
   const result = await next();
-
   const end = Date.now();
-  console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
+  const duration = end - start;
+
+  // Configuração de logging
+  const isDev = process.env.NODE_ENV === 'development';
+  const shouldLog = process.env.TRPC_LOGGING !== 'false'; // Permite desabilitar via env
+
+  if (shouldLog && isDev) {
+    // Lista de códigos que são "esperados" (erros de validação/negócio)
+    const businessErrorCodes = ['CONFLICT', 'UNAUTHORIZED', 'NOT_FOUND', 'BAD_REQUEST'];
+
+    if (result.ok) {
+      // Sucesso
+      console.log(`🟢 [${type}] ${path} - ${duration}ms`);
+    } else if (result.error) {
+      const errorCode = result.error.code;
+
+      // Erros de negócio (esperados) - log silencioso ou mínimo
+      if (businessErrorCodes.includes(errorCode)) {
+        // Opcional: pode comentar para silenciar completamente
+        // console.log(`🟡 [${type}] ${path} - ${errorCode}`);
+      } else {
+        // Erros do sistema (inesperados) - log detalhado
+        console.error(`🔴 [${type}] ${path} - ${errorCode} - ${duration}ms`, {
+          message: result.error.message,
+        });
+      }
+    }
+  }
 
   return result;
 });

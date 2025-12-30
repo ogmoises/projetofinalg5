@@ -18,7 +18,6 @@ const getQueryClient = () => {
   }
   // Browser: use singleton pattern to keep the same query client
   clientQueryClientSingleton ??= createQueryClient();
-
   return clientQueryClientSingleton;
 };
 
@@ -26,8 +25,8 @@ export const api = createTRPCReact<AppRouter>({
   overrides: {
     useMutation: {
       /**
-      * This function is called whenever a `.useMutation` succeeds
-      **/
+       * This function is called whenever a `.useMutation` succeeds
+       **/
       async onSuccess(opts) {
         /**
          * @note that order here matters:
@@ -39,8 +38,8 @@ export const api = createTRPCReact<AppRouter>({
         // Invalidate all queries in the react-query cache:
         await opts.queryClient.invalidateQueries();
       },
-    }
-  }
+    },
+  },
 });
 
 /**
@@ -64,9 +63,33 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
     api.createClient({
       links: [
         loggerLink({
-          enabled: (op) =>
-            process.env.NODE_ENV === "development" ||
-            (op.direction === "down" && op.result instanceof Error),
+          enabled: (op) => {
+            // Desabilita em produção
+            if (process.env.NODE_ENV !== "development") {
+              return false;
+            }
+
+            // Em desenvolvimento, filtra erros esperados (erros de negócio)
+            if (op.direction === "down" && op.result instanceof Error) {
+              const errorCode = (op.result as any).data?.code;
+              
+              // Lista de erros esperados que NÃO devem aparecer no console
+              const expectedErrors = [
+                "CONFLICT",      // Nick/email já existe
+                "UNAUTHORIZED",  // Login inválido
+                "NOT_FOUND",     // Recurso não encontrado
+                "BAD_REQUEST",   // Validação falhou
+              ];
+
+              // Se for um erro esperado, não loga
+              if (expectedErrors.includes(errorCode)) {
+                return false;
+              }
+            }
+
+            // Loga tudo que não foi filtrado (sucessos e erros inesperados)
+            return true;
+          },
         }),
         httpBatchStreamLink({
           transformer: SuperJSON,
